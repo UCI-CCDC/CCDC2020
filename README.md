@@ -2,6 +2,6 @@
 Tools and info for CCDC 2020 competition
 
 
-shortened links - 
+shortened links to raw- 
  * snort-install.sh - https://git.io/JvtRS
- * alan's install script
+ * inventory.sh - (add link in next commit)
