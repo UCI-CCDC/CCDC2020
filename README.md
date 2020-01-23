@@ -2,4 +2,6 @@
 Tools and info for CCDC 2020 competition
 
 
-btw i use arch
+shortened links - 
+ * snort-install.sh - https://git.io/JvtRS
+ * alan's install script
