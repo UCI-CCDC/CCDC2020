@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# https://github.com/UCI-CCDC/CCDC2020
+#UCI CCDC linux inventory script for os detection and to speed up general operations
+
+#Written by UCI CCDC linux subteam
+#UCI CCDC, 2020
+
+
 #print append var
 
 
@@ -27,36 +34,46 @@ if test  [ -f  /proc/version ] ; then
     # shellcheck disable=SC2002
     cat /proc/version | $adtfile
 fi
-#OS picker for first audit
-printf "\n***OS PICK***\n"
-osloop=1
-osOut="OS:"
-while [ $osloop == 1 ] ; do
-	printf "\n***CHOOSE ONE***\n1) Ubuntu\n2) Fedora\n3) Alpine\n4) SunOS\n5) CentOS\n7) Archbtw\n8)lmao none git rekt\n"
-	read -r choice
-	os=""
-	case "$choice" in
-		1) os="Ubuntu" ;;
-		2) os="Fedora" ;;
-		3) os="Alpine" ;;
-		4) os="SunOS" ;;
-		5) os="CentOS" ;;
-		7) os="Archbtw" ;;
-		8) printf "\n***USER INPUT PLEASE***\n"
-			read -r os ;;
-		*) printf "invalid input read -r plz"
 
-	esac
-	if [ "$os" != "" ] ; then
-		printf "%s is the os? [y/N]" "$os"
-		read -r endloop
-		if [ "${endloop}" == "y" ] || [ "${endloop}" == "Y" ] ; then
-		osloop=0
-		osOut="${osOut} ${os}"
-        echo "$osOut" | $adtfile
-		fi
-	fi
-done
+if grep -qs "Ubuntu" /etc/os-release; then
+	echo "This system is using Ubuntu "
+
+#prettyos is the name displayed to user, name is the name for use later in package manager
+prettyOS='cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2'
+shortOS='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
+
+
+
+# #OS picker for first audit
+# printf "\n***OS PICK***\n"
+# osloop=1
+# osOut="OS:"
+# while [ $osloop == 1 ] ; do
+# 	printf "\n***CHOOSE ONE***\n1) Ubuntu\n2) Fedora\n3) Alpine\n4) SunOS\n5) CentOS\n7) Archbtw\n8)lmao none git rekt\n"
+# 	read -r choice
+# 	os=""
+# 	case "$choice" in
+# 		1) os="Ubuntu" ;;
+# 		2) os="Fedora" ;;
+# 		3) os="Alpine" ;;
+# 		4) os="SunOS" ;;
+# 		5) os="CentOS" ;;
+# 		7) os="Archbtw" ;;
+# 		8) printf "\n***USER INPUT PLEASE***\n"
+# 			read -r os ;;
+# 		*) printf "invalid input read -r plz"
+
+# 	esac
+# 	if [ "$os" != "" ] ; then
+# 		printf "%s is the os? [y/N]" "$os"
+# 		read -r endloop
+# 		if [ "${endloop}" == "y" ] || [ "${endloop}" == "Y" ] ; then
+# 		osloop=0
+# 		osOut="${osOut} ${os}"
+#         echo "$osOut" | $adtfile
+# 		fi
+# 	fi
+# done
 
 ##PKG finder/helper
 #printf "\n***PKG Finder***\n"
@@ -72,38 +89,7 @@ printf "I'mma be doing a bunch of shit now lmao"
 #	printf finding packer
 #else
 #	
-#	#do we need to clone a specific something? can't we just clone alias to a something
-#	#grep for stuff in logs
-#	#login passwd change search for unique files
-#	#find all users
-#	#find all grups
-#	#find and parse through groups 
-#	#1000+ 1500+ 
-#	#non default user accounts 
-#	#non default groups
-#	# idk ask morgan or david or something 
-#	#### perhaps just ask person to enter things, like ""guess the package manager""""
-#	#git clone script front for os syntax change/shtuff 
-#	#clone should install (nvim make alias, alias nvim to vim, change colors lmao)
-#	#run alias shtuff, set up anything that needs to be set up
-#	#make as lightweight as possible
-#	#pull all users and all groups
-#	#hopefully prompt user for PW change stuff
-#	#timer maybe?
-#	#ansible timer/color change/notifications
-#	#LAMP for that OS 
-#	#set up basic stuff lime email, secure what needs to be secure
-#	#create file watcher
-#	#create SSH watcher
-#	#keygen SSL
-#	#ask to close ports
-#	#ps aux n stuff
-#	#maybe term split? just need to up productivity
-#	#cpu/other usage
-#	#ldap maybe
-#	#gen names for other ip's for that comp
-#	#fuckin jenkins
-#fi
+
 
 printf "\n***IP ADDRESSES***\n"
 if  hash ip addr 2>/dev/null  ; then
