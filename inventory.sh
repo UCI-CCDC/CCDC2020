@@ -6,7 +6,7 @@
 printf "\n***SYS INFO***\n"
 printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
 touch ~/audit.txt 
-adtfile="$HOME/audit.txt"
+adtfile="tee -a $HOME/audit.txt"
 
 printf "\n****UNAME*****\n"
 foo=$(uname -a)
@@ -14,15 +14,18 @@ echo "$foo"
 
 printf "\n** lsb_rease **\n"
 if  hash lsb_rease 2>/dev/null ; then
-    foo=$(lsb_rease -a)
-    echo "$foo" 
-    printf "\n%s\n" "$foo" >> ~/audit.txt
+    #foo=$(lsb_rease -a)
+    #echo "$foo" 
+    #printf "\n%s\n" "$foo" >> ~/audit.txt
+    lsb_rease -a | $adtfile 
 fi
 
 printf "\n** catproc version **\n"
 if test  [ -f  /proc/version ] ; then 
-    foo=$(cat /proc/version)
-    echo "$foo" >> ~/audit.txt
+    #foo=$(cat /proc/version)
+    #echo "$foo" >> ~/audit.txt
+    # shellcheck disable=SC2002
+    cat /proc/version | $adtfile
 fi
 #OS picker for first audit
 printf "\n***OS PICK***\n"
@@ -50,6 +53,7 @@ while [ $osloop == 1 ] ; do
 		if [ "${endloop}" == "y" ] || [ "${endloop}" == "Y" ] ; then
 		osloop=0
 		osOut="${osOut} ${os}"
+        echo "$osOut" | $adtfile
 		fi
 	fi
 done
@@ -109,34 +113,34 @@ ip addr | awk '
 /^[[:space:]]*inet / {
   split($2, a, "/")
   print iface" : "a[1]
-}' | tee -a "$adtfile"
+}' | $adtfile
 fi
 
 printf "***LIST OF NORMAL USERS***\n"
 dog=$(grep "^UID_MIN" /etc/login.defs)
 cat=$(grep "^UID_MAX" /etc/login.defs)
-awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >>= min && $3 <=max) print $1}' /etc/passwd
+awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >>= min && $3 <=max) print $1}' /etc/passwd | $adtfile
 
 
 
 printf "\n***USERS IN SUDO GROUP***\n"
-grep -Po '^sudo.+:\K.*$' /etc/group | tee -a "$adtfile"
+grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
 #echo "$sudogroup"
 printf "\n***USERS IN ADMIN GROUP***\n"
-grep -Po '^admin.+:\K.*$' /etc/group | tee -a "$adtfile"
+grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
 
 #echo "$admingroup"
 printf "\n***USERS IN WHEEL GROUP***\n"
-grep -Po '^wheel.+:\K.*$' /etc/group | tee -a "$adtfile"
+grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 #echo "$wheel"
 if hash netstat 2>/dev/null ; then 
     netstat -punta > /dev/null 2>/dev/null 
     if $? == 0; then    
-    netstat -punta | grep 22 | tee "$adtfile"
+    netstat -punta | grep 22 | $adtfile 
     else 
         printf "\nnestat -punta failed trying netstat -lsof\n"
-        { netstat -lsof  | tee -a "$adtfile" ;} > /dev/null 2>/dev/null; 
+        { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
     fi
 fi
 ## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
