@@ -1,7 +1,27 @@
 #!/bin/bash
 
+#print append var
+
 
 printf "\n***SYS INFO***\n"
+printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
+touch ~/audit.txt 
+printf "\n****UNAME*****\n"
+foo=$(uname -a)
+echo "$foo"
+
+printf "\n** lsb_rease **\n"
+if  hash lsb_rease 2>/dev/null ; then
+    foo=$(lsb_rease -a)
+    echo "$foo" 
+    printf "\n%s\n" "$foo" >> ~/audit.txt
+fi
+
+printf "\n** catproc version **\n"
+if test  [ -f  /proc/version ] ; then 
+    foo=$(cat /proc/version)
+    echo "$foo" >> ~/audit.txt
+fi
 #OS picker for first audit
 printf "\n***OS PICK***\n"
 osloop=1
@@ -23,7 +43,7 @@ while [ $osloop == 1 ] ; do
 
 	esac
 	if [ "$os" != "" ] ; then
-		printf "${os} is the os? [y/N]"
+		printf "%s is the os? [y/N]" "$os"
 		read -r endloop
 		if [ "${endloop}" == "y" ] || [ "${endloop}" == "Y" ] ; then
 		osloop=0
@@ -39,79 +59,79 @@ done
 #printf lmao get fucked idk why this would be needed
 #printf "${osOut}" >> ~/auditfile.txt
 
-printf u"\u001b[36m I'mma be doing a bunch of shit now lmao"
-if ! [ -x "$(command -v git)" ]; 
-then 
-	printf 'lmao git not installed' >&2
-	printf finding packer
-else
-	
-	#do we need to clone a specific something? can't we just clone alias to a something
-	#grep for stuff in logs
-	#login passwd change search for unique files
-	#find all users
-	#find all grups
-	#find and parse through groups 
-	#1000+ 1500+ 
-	#non default user accounts 
-	#non default groups
-	# idk ask morgan or david or something 
-	#### perhaps just ask person to enter things, like ""guess the package manager""""
-	#git clone script front for os syntax change/shtuff 
-	#clone should install (nvim make alias, alias nvim to vim, change colors lmao)
-	#run alias shtuff, set up anything that needs to be set up
-	#make as lightweight as possible
-	#pull all users and all groups
-	#hopefully prompt user for PW change stuff
-	#timer maybe?
-	#ansible timer/color change/notifications
-	#LAMP for that OS 
-	#set up basic stuff lime email, secure what needs to be secure
-	#create file watcher
-	#create SSH watcher
-	#keygen SSL
-	#ask to close ports
-	#ps aux n stuff
-	#maybe term split? just need to up productivity
-	#cpu/other usage
-	#ldap maybe
-	#gen names for other ip's for that comp
-	#fuckin jenkins
-fi
+printf "I'mma be doing a bunch of shit now lmao"
+#if ! [ -x "$(command -v git)" ]; 
+#then 
+#	printf 'lmao git not installed' >>&2
+#	printf finding packer
+#else
+#	
+#	#do we need to clone a specific something? can't we just clone alias to a something
+#	#grep for stuff in logs
+#	#login passwd change search for unique files
+#	#find all users
+#	#find all grups
+#	#find and parse through groups 
+#	#1000+ 1500+ 
+#	#non default user accounts 
+#	#non default groups
+#	# idk ask morgan or david or something 
+#	#### perhaps just ask person to enter things, like ""guess the package manager""""
+#	#git clone script front for os syntax change/shtuff 
+#	#clone should install (nvim make alias, alias nvim to vim, change colors lmao)
+#	#run alias shtuff, set up anything that needs to be set up
+#	#make as lightweight as possible
+#	#pull all users and all groups
+#	#hopefully prompt user for PW change stuff
+#	#timer maybe?
+#	#ansible timer/color change/notifications
+#	#LAMP for that OS 
+#	#set up basic stuff lime email, secure what needs to be secure
+#	#create file watcher
+#	#create SSH watcher
+#	#keygen SSL
+#	#ask to close ports
+#	#ps aux n stuff
+#	#maybe term split? just need to up productivity
+#	#cpu/other usage
+#	#ldap maybe
+#	#gen names for other ip's for that comp
+#	#fuckin jenkins
+#fi
 
 printf "\n***IP ADDRESSES***\n"
-
-baseip=ip addr | awk '
+if  hash ip addr 2>/dev/null  ; then
+baseip=$(ip addr | awk '
 /^[0-9]+:/ {
   sub(/:/,"",$2); iface=$2 }
 /^[[:space:]]*inet / {
   split($2, a, "/")
   print iface" : "a[1]
-}'
-printf "\n"
-
+}')
+echo "$(baseip)"
+fi
 
 printf "***LIST OF NORMAL USERS***\n"
 dog=$(grep "^UID_MIN" /etc/login.defs)
 cat=$(grep "^UID_MAX" /etc/login.defs)
-awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >= min && $3 <=max) print $1}' /etc/passwd
+awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >>= min && $3 <=max) print $1}' /etc/passwd
 
 
 
 printf "\n***USERS IN SUDO GROUP***\n"
 sudogroup=$(grep -Po '^sudo.+:\K.*$' /etc/group)
-
+echo "$sudogroup"
 printf "\n***USERS IN ADMIN GROUP***\n"
 admingroup=$(grep -Po '^admin.+:\K.*$' /etc/group)
-
+echo "$admingroup"
 printf "\n***USERS IN WHEEL GROUP***\n"
 wheel=$(grep -Po '^wheel.+:\K.*$' /etc/group)
+echo "$wheel"
 
-
-printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
-touch ~/audit.txt 
-netstat -punta | grep 22 >> ~/audit.txt 
-
+if hash netstat -punta 2>/dev/null ; then    
+    netstat -punta | grep 22 >> ~/audit.txt 
+fi
+## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
 #printf '\n*** Making Bash profile log time/date using printf "export HISTTIMEFORMAT="%d/%m/%y %T " >> ~/.bash_profile source ~/.bash_profile'
 #printf export HISTTIMEFORMAT="%d/%m/%y %T" >> ~/.bash_profile 
 #source ~/.bash_profile
