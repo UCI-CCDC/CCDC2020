@@ -11,7 +11,6 @@ adtfile="tee -a $HOME/audit.txt"
 printf "\n****UNAME*****\n"
 foo=$(uname -a)
 echo "$foo"
-
 printf "\n** lsb_rease **\n"
 if  hash lsb_rease 2>/dev/null ; then
     #foo=$(lsb_rease -a)
@@ -21,7 +20,7 @@ if  hash lsb_rease 2>/dev/null ; then
 fi
 
 printf "\n** catproc version **\n"
-if test  [ -f  /proc/version ] ; then 
+if test   -f  /proc/version  ; then 
     #foo=$(cat /proc/version)
     #echo "$foo" >> ~/audit.txt
     # shellcheck disable=SC2002
@@ -31,6 +30,7 @@ fi
 printf "\n***OS PICK***\n"
 osloop=1
 osOut="OS:"
+
 while [ $osloop == 1 ] ; do
 	printf "\n***CHOOSE ONE***\n1) Ubuntu\n2) Fedora\n3) Alpine\n4) SunOS\n5) CentOS\n7) Archbtw\n8)lmao none git rekt\n"
 	read -r choice
@@ -57,7 +57,20 @@ while [ $osloop == 1 ] ; do
 		fi
 	fi
 done
-
+if [ "$os" == "Alpine" ] ; then
+    alpinelp=1
+    while [ "$alpinelp" == 1 ] ; do
+        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
+        read -r alpinechoice
+            case "$alpinechoice" in 
+            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            alpinelp=0;;
+            N|n) alpinelp=0;; 
+            ?) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils" ;;
+            *) printf "invalid choice" 
+        esac
+    done
+fi
 ##PKG finder/helper
 #printf "\n***PKG Finder***\n"
 #pkgloop=1
@@ -65,7 +78,8 @@ done
 #printf lmao get fucked idk why this would be needed
 #printf "${osOut}" >> ~/auditfile.txt
 
-printf "I'mma be doing a bunch of shit now lmao"
+#printf "I'mma be doing a bunch of shit now lmao"
+
 #if ! [ -x "$(command -v git)" ]; 
 #then 
 #	printf 'lmao git not installed' >>&2
@@ -112,8 +126,7 @@ ip addr | awk '
   sub(/:/,"",$2); iface=$2 }
 /^[[:space:]]*inet / {
   split($2, a, "/")
-  print iface" : "a[1]
-}' | $adtfile
+  print iface" : "a[1] }' | $adtfile
 fi
 
 printf "***LIST OF NORMAL USERS***\n"
