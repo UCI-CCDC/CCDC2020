@@ -152,7 +152,7 @@ if hash netstat 2>/dev/null ; then
     if $? == 0; then    
     netstat -punta | grep 22 | $adtfile 
     else 
-        printf "\nnestat -punta failed trying netstat -lsof\n"
+        printf "\nnetstat -punta failed trying netstat -lsof\n"
         { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
     fi
 fi
