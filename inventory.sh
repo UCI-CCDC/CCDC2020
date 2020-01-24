@@ -6,6 +6,8 @@
 printf "\n***SYS INFO***\n"
 printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
 touch ~/audit.txt 
+adtfile="$HOME/audit.txt"
+
 printf "\n****UNAME*****\n"
 foo=$(uname -a)
 echo "$foo"
@@ -101,14 +103,13 @@ printf "I'mma be doing a bunch of shit now lmao"
 
 printf "\n***IP ADDRESSES***\n"
 if  hash ip addr 2>/dev/null  ; then
-baseip=$(ip addr | awk '
+ip addr | awk '
 /^[0-9]+:/ {
   sub(/:/,"",$2); iface=$2 }
 /^[[:space:]]*inet / {
   split($2, a, "/")
   print iface" : "a[1]
-}')
-echo "$(baseip)"
+}' | tee -a "$adtfile"
 fi
 
 printf "***LIST OF NORMAL USERS***\n"
@@ -119,23 +120,37 @@ awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >>= min && $3 
 
 
 printf "\n***USERS IN SUDO GROUP***\n"
-sudogroup=$(grep -Po '^sudo.+:\K.*$' /etc/group)
-echo "$sudogroup"
+grep -Po '^sudo.+:\K.*$' /etc/group | tee -a "$adtfile"
+#echo "$sudogroup"
 printf "\n***USERS IN ADMIN GROUP***\n"
-admingroup=$(grep -Po '^admin.+:\K.*$' /etc/group)
-echo "$admingroup"
-printf "\n***USERS IN WHEEL GROUP***\n"
-wheel=$(grep -Po '^wheel.+:\K.*$' /etc/group)
-echo "$wheel"
+grep -Po '^admin.+:\K.*$' /etc/group | tee -a "$adtfile"
 
-if hash netstat -punta 2>/dev/null ; then    
-    netstat -punta | grep 22 >> ~/audit.txt 
+#echo "$admingroup"
+printf "\n***USERS IN WHEEL GROUP***\n"
+grep -Po '^wheel.+:\K.*$' /etc/group | tee -a "$adtfile"
+
+#echo "$wheel"
+if hash netstat 2>/dev/null ; then 
+    netstat -punta > /dev/null 2>/dev/null 
+    if $? == 0; then    
+    netstat -punta | grep 22 | tee "$adtfile"
+    else 
+        printf "\nnestat -punta failed trying netstat -lsof\n"
+        { netstat -lsof  | tee -a "$adtfile" ;} > /dev/null 2>/dev/null; 
+    fi
 fi
 ## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
-#printf '\n*** Making Bash profile log time/date using printf "export HISTTIMEFORMAT="%d/%m/%y %T " >> ~/.bash_profile source ~/.bash_profile'
-#printf export HISTTIMEFORMAT="%d/%m/%y %T" >> ~/.bash_profile 
-#source ~/.bash_profile
-
+echo 'NOTE THIS MIGHT NOT WORK'
+ # shellcheck disable=SC2016
+printf '*** Making Bash profile log time/date using at $HOME/.bash_profile ***'
+ # shellcheck disable=SC2183
+if printf 'export HISTTIMEFORMAT="%d/%m/%y %T"' >> ~/.bash_profile >/dev/null 2>/dev/null == 0 ; then 
+    # shellcheck source=/dev/null
+      source ~/.bash_profile
+    
+else 
+    echo something went wrong with making bash profile track time! 
+fi
 
 #curl -
 #pull the external audit.sh script
