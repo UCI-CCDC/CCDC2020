@@ -12,7 +12,7 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
-log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
+#log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
 
 printf "\n*** generating audit.txt in your home directory\n"
 touch $HOME/audit.txt 
@@ -57,13 +57,16 @@ printf "[  \033[01;35mUser\033[0m, \033[01;36mGroup\033[0m  ]\n" && grep "sudo\|
 printf "To delete users/groups, use \033[01;30msudo userdel -r \$user\033[0m and \033[01;30msudo groupdel \$user\033[0m\n"
 
 ## /etc/sudoers
-log "Sudoers"
-sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
+if [ -f /etc/sudoers ] ; then
+    printf "\033[01;30m$(date)\033[0m: %s\n" "Sudoers"
+    sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
+fi 
 
 ## Less Fancy /etc/shadow
-log "Passwordless accounts: "
+printf "\033[01;30m$(date)\033[0m: %s\n" "Passwordless accounts: "
 awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
 echo;
+
 #printf "\n***USERS IN SUDO GROUP***\n"
 #grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
 #

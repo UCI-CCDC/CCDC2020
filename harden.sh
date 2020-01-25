@@ -22,7 +22,7 @@ fi
 ## Files to backup
 declare -a backup=(/etc/sysctl.conf /etc/pam.conf /etc/host.conf /etc/sysconfig /etc/ssh/sshd_config)
 
-log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
+#log () { printf "\033[01;30m$(date)\033[0m: %s\n" }
 
 # Install & Configure
 
@@ -47,7 +47,7 @@ if [ -f "/etc/ssh/sshd_config" ]; then
 	sed -i 's/PermitEmptyPasswords yes/PermitEmptyPasswords no/' /etc/ssh/sshd_config
 	[ ! $(grep 'PermitEmptyPasswords' /etc/ssh/sshd_config) ] && echo 'PermitEmptyPasswords no' >> /etc/ssh/sshd_config
 	 
-	log "Modified sshd_config, restarting"
+	printf "\033[01;30m$(date)\033[0m: %s\n" "Modified sshd_config, restarting"
    service sshd restart
 fi
 
@@ -57,13 +57,13 @@ fi
 ## Modify /etc/sysctl.conf
 wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/master/configs/sctlconf
 sysctl -p sctlconf
-log "Configured /etc/sysctl.conf"
+printf "\033[01;30m$(date)\033[0m: %s\n" "Configured /etc/sysctl.conf"
 
 ## IPv6 is the future but I ain't ready for it
 if [ -f "/etc/modprobe.d/aliases" ]; then
 	cp /etc/modprobe.d/aliases /etc/modprobe.d/aliases.old #make a backup just in case
 	sed -i 's/alias net-pf-10 ipv6/alias net-pf-10 off\nalias ipv6 off/' /etc/modprobe.d/aliases
-	log "Disabled IPv6"
+	printf "\033[01;30m$(date)\033[0m: %s\n" "Disabled IPv6"
 fi
 
 ## Enable Firewall
