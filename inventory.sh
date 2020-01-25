@@ -7,73 +7,17 @@
 #UCI CCDC, 2020
 
 
-#print append var
-
-
-printf "\n***SYS INFO***\n"
-printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
+printf "\n*** generating audit.txt in your home directory\n"
 touch ~/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
-printf "\n****UNAME*****\n"
-foo=$(uname -a)
-echo "$foo"
 
-printf "\n** lsb_rease **\n"
-if  hash lsb_rease 2>/dev/null ; then
-    #foo=$(lsb_rease -a)
-    #echo "$foo" 
-    #printf "\n%s\n" "$foo" >> ~/audit.txt
-    lsb_rease -a | $adtfile 
-fi
-
-printf "\n** catproc version **\n"
-if test  [ -f  /proc/version ] ; then 
-    #foo=$(cat /proc/version)
-    #echo "$foo" >> ~/audit.txt
-    # shellcheck disable=SC2002
-    cat /proc/version | $adtfile
-fi
-
-if grep -qs "Ubuntu" /etc/os-release; then
-	echo "This system is using Ubuntu "
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
 prettyOS='cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2'
-shortOS='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
+osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
+echo $osOut | $adtfile
 
-
-
-# #OS picker for first audit
-# printf "\n***OS PICK***\n"
-# osloop=1
-# osOut="OS:"
-# while [ $osloop == 1 ] ; do
-# 	printf "\n***CHOOSE ONE***\n1) Ubuntu\n2) Fedora\n3) Alpine\n4) SunOS\n5) CentOS\n7) Archbtw\n8)lmao none git rekt\n"
-# 	read -r choice
-# 	os=""
-# 	case "$choice" in
-# 		1) os="Ubuntu" ;;
-# 		2) os="Fedora" ;;
-# 		3) os="Alpine" ;;
-# 		4) os="SunOS" ;;
-# 		5) os="CentOS" ;;
-# 		7) os="Archbtw" ;;
-# 		8) printf "\n***USER INPUT PLEASE***\n"
-# 			read -r os ;;
-# 		*) printf "invalid input read -r plz"
-
-# 	esac
-# 	if [ "$os" != "" ] ; then
-# 		printf "%s is the os? [y/N]" "$os"
-# 		read -r endloop
-# 		if [ "${endloop}" == "y" ] || [ "${endloop}" == "Y" ] ; then
-# 		osloop=0
-# 		osOut="${osOut} ${os}"
-#         echo "$osOut" | $adtfile
-# 		fi
-# 	fi
-# done
 
 ##PKG finder/helper
 #printf "\n***PKG Finder***\n"
