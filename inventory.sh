@@ -12,6 +12,8 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
+
 printf "\n*** generating audit.txt in your home directory\n"
 touch $HOME/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
