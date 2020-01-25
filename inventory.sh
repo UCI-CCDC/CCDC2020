@@ -69,7 +69,7 @@ if hash netstat 2>/dev/null ; then
 fi
 
 
-printf '**services you should cry about'
+printf '**services you should cry about***\n'
 ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql'
 
 
