@@ -1,24 +1,13 @@
 #!/bin/bash
 
-#print append var
-
-
-printf "\n***SYS INFO***\n"
-printf "\n*** touching audit txt just to keep located in ~/audit.txt\n"
+printf "\n*** generating audit.txt in your home directory\n"
 touch ~/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
-printf "\n****UNAME*****\n"
-foo=$(uname -a)
-echo "$foo"
-printf "\n** lsb_rease **\n"
-if  hash lsb_rease 2>/dev/null ; then
-    #foo=$(lsb_rease -a)
-    #echo "$foo" 
-    #printf "\n%s\n" "$foo" >> ~/audit.txt
-    lsb_rease -a | $adtfile 
-fi
-
+#prettyos is the name displayed to user, name is the name for use later in package manager
+cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2
+cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 | $adtfile 
+echo $osOut | $adtfile
 printf "\n** catproc version **\n"
 if test   -f  /proc/version  ; then 
     #foo=$(cat /proc/version)
