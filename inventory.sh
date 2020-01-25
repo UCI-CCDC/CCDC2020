@@ -11,8 +11,6 @@ printf "\n*** generating audit.txt in your home directory\n"
 touch ~/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
-echo 'uname -a' | $adtfile
-
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
 prettyOS='cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2'
@@ -69,6 +67,12 @@ if hash netstat 2>/dev/null ; then
         { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
     fi
 fi
+
+
+printf '**services you should cry about'
+ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql'
+
+
 ## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
 echo 'NOTE THIS MIGHT NOT WORK'
  # shellcheck disable=SC2016
