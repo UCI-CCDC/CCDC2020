@@ -26,13 +26,13 @@ echo $osOut | $adtfile
 
 
 
-if [ "$osOut" == "Alpine" ] ; then
+if [ "$osOut" == "Alpine Linux" ] ; then
     alpinelp=1
     while [ "$alpinelp" == 1 ] ; do
         printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
         read -r alpinechoice
             case "$alpinechoice" in 
-            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            Y|y) apk update && apk upgrade && apk add bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
             alpinelp=0;;
             N|n) alpinelp=0;; 
             w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
