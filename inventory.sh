@@ -20,8 +20,6 @@ adtfile="tee -a $HOME/audit.txt"
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
 prettyOS='cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2'
-osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
-echo $osOut | $adtfile
 
 
 
@@ -65,35 +63,20 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 
 
-if hash netstat 2>/dev/null ; then 
-    netstat -punta > /dev/null 2>/dev/null 
-    if $? == 0; then    
-    netstat -punta | grep 22 | $adtfile 
-    else 
+# if hash netstat 2>/dev/null ; then 
+#     netstat -punta > /dev/null 2>/dev/null 
+#     if $? == 0; then    
+#     netstat -punta | $adtfile 
+#     else 
 
-        printf "\n netstat -punta failed trying netstat -lsof\n"
+#         printf "\n netstat -punta failed trying netstat -lsof\n"
 
-        { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
-    fi
-fi
-
-
-printf '**services you should cry about***\n'
-ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql'
+#         { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
+#     fi
+# fi
 
 
-## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
-echo 'NOTE THIS MIGHT NOT WORK'
- # shellcheck disable=SC2016
-printf '*** Making Bash profile log time/date using at $HOME/.bash_profile ***'
- # shellcheck disable=SC2183
-if printf 'export HISTTIMEFORMAT="%d/%m/%y %T"' >> ~/.bash_profile >/dev/null 2>/dev/null == 0 ; then 
-    # shellcheck source=/dev/null
-      source ~/.bash_profile
-    
-else 
-    echo something went wrong with making bash profile track time! 
-fi
+printf '\n\n**services you should cry about***\n'
+ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql' | grep -v "grep"
 
-#curl -
-#pull the external audit.sh script
+
