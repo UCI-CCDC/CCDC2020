@@ -7,6 +7,11 @@
 #UCI CCDC, 2020
 
 
+if [[ $EUID -ne 0 ]]; then
+	printf 'Must be run as root, exiting!\n'
+	exit 1
+fi
+
 printf "\n*** generating audit.txt in your home directory\n"
 touch ~/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
@@ -18,20 +23,24 @@ osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
 echo $osOut | $adtfile
 
 
-##PKG finder/helper
-#printf "\n***PKG Finder***\n"
-#pkgloop=1
-#pkgOut="pkgmgr:"
-#printf lmao get fucked idk why this would be needed
-#printf "${osOut}" >> ~/auditfile.txt
 
-printf "I'mma be doing a bunch of shit now lmao"
-#if ! [ -x "$(command -v git)" ]; 
-#then 
-#	printf 'lmao git not installed' >>&2
-#	printf finding packer
-#else
-#	
+
+
+if [ "$osOut" == "Alpine" ] ; then
+    alpinelp=1
+    while [ "$alpinelp" == 1 ] ; do
+        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
+        read -r alpinechoice
+            case "$alpinechoice" in 
+            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            alpinelp=0;;
+            N|n) alpinelp=0;; 
+            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
+            *) printf "invalid choice" 
+        esac
+    done
+fi
+
 
 
 
@@ -66,15 +75,15 @@ fi
 
 printf "\n***USERS IN SUDO GROUP***\n"
 grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
-#echo "$sudogroup"
+
 printf "\n***USERS IN ADMIN GROUP***\n"
 grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
 
-#echo "$admingroup"
 printf "\n***USERS IN WHEEL GROUP***\n"
 grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
-#echo "$wheel"
+
+
 if hash netstat 2>/dev/null ; then 
     netstat -punta > /dev/null 2>/dev/null 
     if $? == 0; then    
