@@ -12,12 +12,10 @@ touch ~/audit.txt
 adtfile="tee -a $HOME/audit.txt"
 
 
-
 #prettyos is the name displayed to user, name is the name for use later in package manager
-prettyOS='cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2'
+cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2 | $adtfile
 osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
 echo $osOut | $adtfile
-
 
 
 ##PKG finder/helper
@@ -27,14 +25,30 @@ echo $osOut | $adtfile
 #printf lmao get fucked idk why this would be needed
 #printf "${osOut}" >> ~/auditfile.txt
 
-#printf "I'mma be doing a bunch of shit now lmao"
-
+printf "I'mma be doing a bunch of shit now lmao"
 #if ! [ -x "$(command -v git)" ]; 
 #then 
 #	printf 'lmao git not installed' >>&2
 #	printf finding packer
 #else
 #	
+
+
+
+if [ "$osOut" == "Alpine" ] ; then
+    alpinelp=1
+    while [ "$alpinelp" == 1 ] ; do
+        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
+        read -r alpinechoice
+            case "$alpinechoice" in 
+            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            alpinelp=0;;
+            N|n) alpinelp=0;; 
+            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
+            *) printf "invalid choice" 
+        esac
+    done
+fi
 
 
 printf "\n***IP ADDRESSES***\n"
@@ -44,7 +58,8 @@ ip addr | awk '
   sub(/:/,"",$2); iface=$2 }
 /^[[:space:]]*inet / {
   split($2, a, "/")
-  print iface" : "a[1] }' | $adtfile
+  print iface" : "a[1]
+}' | $adtfile
 fi
 
 
@@ -63,11 +78,9 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 if hash netstat 2>/dev/null ; then 
     netstat -punta > /dev/null 2>/dev/null 
     if $? == 0; then    
-    netstat -punta | grep 22 | $adtfile 
+    netstat -punta | $adtfile 
     else 
-
         printf "\n netstat -punta failed trying netstat -lsof\n"
-
         { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
     fi
 fi
