@@ -11,6 +11,7 @@ printf "\n*** generating audit.txt in your home directory\n"
 touch ~/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
+echo 'uname -a' | $adtfile
 
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
@@ -46,11 +47,6 @@ ip addr | awk '
 }' | $adtfile
 fi
 
-printf "***LIST OF NORMAL USERS***\n"
-dog=$(grep "^UID_MIN" /etc/login.defs)
-cat=$(grep "^UID_MAX" /etc/login.defs)
-awk -F':' -v min="${dog#UID_MIN}" -v max="${cat#UID_MAX}" '{if($3 >>= min && $3 <=max) print $1}' /etc/passwd | $adtfile
-
 
 
 printf "\n***USERS IN SUDO GROUP***\n"
@@ -69,7 +65,7 @@ if hash netstat 2>/dev/null ; then
     if $? == 0; then    
     netstat -punta | grep 22 | $adtfile 
     else 
-        printf "\nnestat -punta failed trying netstat -lsof\n"
+        printf "\n netstat -punta failed trying netstat -lsof\n"
         { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
     fi
 fi
