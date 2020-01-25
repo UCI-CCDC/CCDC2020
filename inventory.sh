@@ -50,15 +50,27 @@ ip addr | awk '
 }' | $adtfile
 fi
 
-printf "\n***USERS IN SUDO GROUP***\n"
-grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
+## /etc/group
+printf "[  \033[01;35mUser\033[0m, \033[01;36mGroup\033[0m  ]\n" && grep "sudo\|adm\|bin\|sys\|uucp\|wheel\|nopasswdlogin\|root" /etc/group | awk -F: '{printf "\033[01;35m" $4 "\033[0m : \033[01;36m" $1 "\033[0m\n"}' | column |$adtfile
+printf "To delete users/groups, use \033[01;30msudo userdel -r \$user\033[0m and \033[01;30msudo groupdel \$user\033[0m\n"
 
-printf "\n***USERS IN ADMIN GROUP***\n"
-grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
+## /etc/sudoers
+log "Sudoers"
+sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 
-printf "\n***USERS IN WHEEL GROUP***\n"
-grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
-
+## Less Fancy /etc/shadow
+log "Passwordless accounts: "
+awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
+echo;
+#printf "\n***USERS IN SUDO GROUP***\n"
+#grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
+#
+#printf "\n***USERS IN ADMIN GROUP***\n"
+#grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
+#
+#printf "\n***USERS IN WHEEL GROUP***\n"
+#grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
+#
 if hash netstat 2>/dev/null ; then 
     if [ $(netstat -punta  2>/dev/null) ] ; then 
         netstat -punta | $adtfile 
@@ -84,6 +96,14 @@ ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql' 
 #else 
 #    echo something went wrong with making bash profile track time! 
 #fi
+
+printf 'wgetting git harden.sh please run eventually, if this fails go into inventory.sh and get the file'
+if hash wget 2>/dev/null ; then
+    wget https://git.io/Jvq37
+else
+    echo wget failed, file is https://git.io/Jvq37
+fi
+
 
 #curl -
 #pull the external audit.sh script
