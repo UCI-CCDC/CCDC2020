@@ -78,19 +78,6 @@ echo "nospoof on" | sudo tee -a /etc/host.conf
 ## Remove anything world-readable from home directories
 sudo chmod 0750 /home/
 
-## Lock dumb accounts
-passwd -l proxy
-passwd -l backup
-passwd -l list
-passwd -l wheel
-passwd -l irc
-passwd -l gnats
-passwd -l avahi
-passwd -l nobody
-passwd -l sshd
-passwd -l samba
-passwd -l ntp
-passwd -l postfix
 
 ## Install & update utilities
 if [ $(which apt-get) ]; then # Debian based
