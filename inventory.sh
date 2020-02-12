@@ -12,6 +12,8 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+
+
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
 while getopts u:d:p:f: option
@@ -24,6 +26,7 @@ p) PRODUCT=${OPTARG};;
 f) FORMAT=${OPTARG};;
 esac
 done
+
 
 
 
@@ -58,9 +61,12 @@ fi
 
 
 
+
 if [ "$osOut" == "Alpine" ] ; then
+=======
 #alpine linux will not be at regionals
 if [ "$osOut" == "Alpine Linux" ] ; then
+>>>>>>> Stashed changes
     alpinelp=1
     while [ "$alpinelp" == 1 ] ; do
         printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
@@ -74,6 +80,7 @@ if [ "$osOut" == "Alpine Linux" ] ; then
         esac
     done
 fi
+
 
 
 
@@ -135,6 +142,7 @@ printf '\n\n**services you should cry about***\n'
 ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql' | grep -v "grep"
 
 
+
 printf '**services you should cry about***\n'
 ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9'
 
@@ -154,3 +162,4 @@ fi
 
 #curl -
 #pull the external audit.sh script
+
