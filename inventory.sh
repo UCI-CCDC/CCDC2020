@@ -7,6 +7,21 @@
 #UCI CCDC, 2020
 
 
+### FEATURES TO ADD #####################################
+# - (-h) help functionality to list flags
+# - (-n) flag to run nmap script
+# - (-u) flag to install updates
+# - (- ) flag to harden system (flag not decided, -h already taken)
+# - (-i) flag to install updates, and then install packages that are useful and check for basic utilities (nmap, tmux, tshark )[curl, man, vim]
+# - set it to run it's usual thing if no flags given
+
+
+# are sql  password changes automatable? 
+# set script to check for non-default cron jobs
+# fix audit file logging, it's not creating the file right now
+    # also wouldn't be a bad idea to make the script automatically upload the audit to 0x0.st (have it start the file off with the machine's IP and hostname)
+#is it possible to automate verifying permissions on important files?
+
 if [[ $EUID -ne 0 ]]; then
 	printf 'Must be run as root, exiting!\n'
 	exit 1
@@ -16,10 +31,6 @@ fi
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
-while getopts u:d:p:f: option
-do
-case "${option}"
-in
 # while getopts u:d:p:f: option
 # do
 # case "${option}"
