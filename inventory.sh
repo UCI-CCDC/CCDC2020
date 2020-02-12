@@ -20,12 +20,16 @@ while getopts u:d:p:f: option
 do
 case "${option}"
 in
-u) USER=${OPTARG};;
-d) DATE=${OPTARG};;
-p) PRODUCT=${OPTARG};;
-f) FORMAT=${OPTARG};;
-esac
-done
+# while getopts u:d:p:f: option
+# do
+# case "${option}"
+# in
+# u) USER=${OPTARG};;
+# d) DATE=${OPTARG};;
+# p) PRODUCT=${OPTARG};;
+# f) FORMAT=${OPTARG};;
+# esac
+# done
 
 
 
@@ -99,19 +103,19 @@ fi
 
 #this doesn't work
 # ## Less Fancy /etc/shadow
-# printf "\033[01;30m$(date)\033[0m: %s\n" "Passwordless accounts: "
-# awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
-# echo;
+printf "\033[01;30m$(date)\033[0m: %s\n" "Passwordless accounts: "
+awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
+echo;
 
-#printf "\n***USERS IN SUDO GROUP***\n"
-#grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
-#
-#printf "\n***USERS IN ADMIN GROUP***\n"
-#grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
-#
-#printf "\n***USERS IN WHEEL GROUP***\n"
-#grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
-#
+printf "\n***USERS IN SUDO GROUP***\n"
+grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
+
+printf "\n***USERS IN ADMIN GROUP***\n"
+grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
+
+printf "\n***USERS IN WHEEL GROUP***\n"
+grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
+
 
 
 
