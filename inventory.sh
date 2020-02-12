@@ -30,19 +30,16 @@ done
 
 
 
+#log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
+
+
 printf "\n*** generating audit.txt in your home directory\n"
-touch ~/audit.txt 
+touch $HOME/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
-
-
 cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2 | $adtfile
-osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
-echo $osOut | $adtfile
-
-
 
 
 #alpine linux will not be at regionals
@@ -64,6 +61,20 @@ fi
 
 
 
+if  grep -i "alpine" /etc/os-release ; then
+    alpinelp=1
+    while [ "$alpinelp" == 1 ] ; do
+        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
+        read -r alpinechoice
+            case "$alpinechoice" in 
+            Y|y) apk update && apk upgrade && apk add bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            alpinelp=0;;
+            N|n) alpinelp=0;; 
+            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
+            *) printf "invalid choice" 
+        esac
+    done
+fi
 
 
 printf "\n***IP ADDRESSES***\n"
@@ -79,29 +90,28 @@ fi
 
 
 
-printf "\n***USERS IN SUDO GROUP***\n"
-grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
 
-printf "\n***USERS IN ADMIN GROUP***\n"
-grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
+## /etc/sudoers
+if [ -f /etc/sudoers ] ; then
+    printf "\033[01;30m$(date)\033[0m: %s\n" "Sudoers"
+    sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
+fi 
 
-printf "\n***USERS IN WHEEL GROUP***\n"
-grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
+#this doesn't work
+# ## Less Fancy /etc/shadow
+# printf "\033[01;30m$(date)\033[0m: %s\n" "Passwordless accounts: "
+# awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
+# echo;
 
-
-
-
-if hash netstat 2>/dev/null ; then 
-    netstat -punta > /dev/null 2>/dev/null 
-    if $? == 0; then    
-    netstat -punta | $adtfile 
-    else 
-        printf "\n netstat -punta failed trying netstat -lsof\n"
-        { netstat -lsof  | $adtfile ;} > /dev/null 2>/dev/null; 
-    fi
-fi
-
-
+#printf "\n***USERS IN SUDO GROUP***\n"
+#grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
+#
+#printf "\n***USERS IN ADMIN GROUP***\n"
+#grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
+#
+#printf "\n***USERS IN WHEEL GROUP***\n"
+#grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
+#
 
 
 
@@ -122,6 +132,16 @@ else
     echo something went wrong with making bash profile track time! 
 fi
 
+
+#this is currently broken
+# printf 'wgetting git harden.sh please run eventually, if this fails go into inventory.sh and get the file'
+# if hash wget 2>/dev/null ; then
+#     wget https://git.io/Jvq37
+# else
+#     echo wget failed, file is https://git.io/Jvq37
+
+# fi
+
+
 #curl -
 #pull the external audit.sh script
-
