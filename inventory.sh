@@ -43,30 +43,10 @@ osOut='cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2 '
 echo $osOut | $adtfile
 
 
-if [ "$osOut" == "Alpine" ] ; then
-    alpinelp=1
-    while [ "$alpinelp" == 1 ] ; do
-        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
-        read -r alpinechoice
-            case "$alpinechoice" in 
-            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
-            alpinelp=0;;
-            N|n) alpinelp=0;; 
-            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
-            *) printf "invalid choice" 
-        esac
-    done
-fi
 
 
-
-
-
-if [ "$osOut" == "Alpine" ] ; then
-=======
 #alpine linux will not be at regionals
 if [ "$osOut" == "Alpine Linux" ] ; then
->>>>>>> Stashed changes
     alpinelp=1
     while [ "$alpinelp" == 1 ] ; do
         printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
@@ -84,21 +64,6 @@ fi
 
 
 
-
-if [ "$osOut" == "Alpine" ] ; then
-    alpinelp=1
-    while [ "$alpinelp" == 1 ] ; do
-        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
-        read -r alpinechoice
-            case "$alpinechoice" in 
-            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
-            alpinelp=0;;
-            N|n) alpinelp=0;; 
-            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
-            *) printf "invalid choice" 
-        esac
-    done
-fi
 
 
 printf "\n***IP ADDRESSES***\n"
@@ -138,13 +103,10 @@ fi
 
 
 
-printf '\n\n**services you should cry about***\n'
-ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql' | grep -v "grep"
-
 
 
 printf '**services you should cry about***\n'
-ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9'
+ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep"
 
 
 ## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
