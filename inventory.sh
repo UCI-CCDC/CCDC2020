@@ -47,6 +47,9 @@ h)
     exit 1;;
 u) 
     printf "update portion of script not yet implemented\n"
+    #this portion of the script will be built into the update function higher up in the script
+    #this will allow both -u and -i to call the same update functionality
+    #it will also rely on the OS name in order to determine what package manager to use to install updates
     exit 1;;
 i) 
     printf "update and install portion of script not yet implemented"
@@ -70,7 +73,9 @@ adtfile="tee -a $HOME/audit.txt"
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
-echo $osOut | $adtfile
+prinf "This machine's OS is "
+#The super fucked formatting below this prints out prettyname, but in red text
+echo -e "\e[31m$osOut\e[0m" | $adtfile
 
 
 #alpine linux will not be at regionals
@@ -127,23 +132,25 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 
 
-
+#saves services to variable, prints them out to terminal in blue
 printf '**services you should cry about***\n'
-ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep"
+services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
+echo -e "\e[34m$services\e[0m" | $adtfile
+
 
 
 ## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
-echo 'NOTE THIS MIGHT NOT WORK'
- # shellcheck disable=SC2016
-printf '*** Making Bash profile log time/date using at $HOME/.bash_profile ***'
- # shellcheck disable=SC2183
-if printf 'export HISTTIMEFORMAT="%d/%m/%y %T"' >> ~/.bash_profile >/dev/null 2>/dev/null == 0 ; then 
-    # shellcheck source=/dev/null
-      source ~/.bash_profile
+# echo 'NOTE THIS MIGHT NOT WORK'
+#  # shellcheck disable=SC2016
+# printf '*** Making Bash profile log time/date using at $HOME/.bash_profile ***'
+#  # shellcheck disable=SC2183
+# if printf 'export HISTTIMEFORMAT="%d/%m/%y %T"' >> ~/.bash_profile >/dev/null 2>/dev/null == 0 ; then 
+#     # shellcheck source=/dev/null
+#       source ~/.bash_profile
     
-else 
-    echo something went wrong with making bash profile track time! 
-fi
+# else 
+#     echo something went wrong with making bash profile track time! 
+# fi
 
 
 #this is currently broken
