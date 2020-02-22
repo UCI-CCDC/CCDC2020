@@ -27,7 +27,7 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
-function updateOS($os-name) {
+updateOS() {
     printf "this would be the update OS function, if someone finally fucking implemented it"
 
 }
@@ -46,7 +46,7 @@ h)
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
 u) 
-    printf " update portion of script not yet implemented\n"
+    printf "update portion of script not yet implemented\n"
     exit 1;;
 i) 
     printf "update and install portion of script not yet implemented"
@@ -63,13 +63,13 @@ done
 #log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
 
 
-printf "\n*** generating audit.txt in your home directory\n"
+printf "\n*** generating audit.txt in your root home directory\n"
 touch $HOME/audit.txt 
 adtfile="tee -a $HOME/audit.txt"
 
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
-$osOut = cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2
+osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 echo $osOut | $adtfile
 
 
