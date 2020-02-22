@@ -7,7 +7,6 @@
 #UCI CCDC, 2020
 
 
-### FEATURES TO ADD #####################################
 # - (-h) help functionality to list flags
 # - (-n) flag to run nmap script
 # - (-u) flag to install updates
@@ -18,7 +17,6 @@
 
 # are sql  password changes automatable? 
 # set script to check for non-default cron jobs
-# fix audit file logging, it's not creating the file right now
     # also wouldn't be a bad idea to make the script automatically upload the audit to 0x0.st (have it start the file off with the machine's IP and hostname)
 #is it possible to automate verifying permissions on important files?
 
@@ -73,7 +71,7 @@ adtfile="tee -a $HOME/audit.txt"
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
-prinf "This machine's OS is "
+printf "This machine's OS is "
 #The super fucked formatting below this prints out prettyname, but in red text
 echo -e "\e[31m$osOut\e[0m" | $adtfile
 
@@ -95,6 +93,7 @@ if  grep -i "alpine" /etc/os-release ; then
 fi
 
 
+#THIS IS CURRENTLY BROKEN
 printf "\n***IP ADDRESSES***\n"
 if  hash ip addr 2>/dev/null  ; then
 ip addr | awk '
@@ -111,13 +110,14 @@ fi
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
-    printf "\033[01;30m$(date)\033[0m: %s\n" "Sudoers"
+    printf "Sudoers"
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
 #this doesn't work
 # ## Less Fancy /etc/shadow
-printf "\033[01;30m$(date)\033[0m: %s\n" "Passwordless accounts: "
+# this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
+printf "Passwordless accounts: "
 awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
 echo;
 
@@ -133,7 +133,7 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 
 #saves services to variable, prints them out to terminal in blue
-printf '**services you should cry about***\n'
+printf '\n**services you should cry about***\n'
 services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
 echo -e "\e[34m$services\e[0m" | $adtfile
 
