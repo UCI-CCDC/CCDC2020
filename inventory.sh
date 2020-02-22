@@ -27,20 +27,35 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+function updateOS($os-name) {
+    printf "this would be the update OS function, if someone finally fucking implemented it"
 
+}
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
-# while getopts u:d:p:f: option
-# do
-# case "${option}"
-# in
-# u) USER=${OPTARG};;
-# d) DATE=${OPTARG};;
-# p) PRODUCT=${OPTARG};;
-# f) FORMAT=${OPTARG};;
-# esac
-# done
+while getopts huin option
+do
+case "${option}"
+in
+h) 
+    printf "\n UCI CCDC 2020 Linux Inventory Script\n"
+    printf " -h     Prints this help menu\n"
+    printf " -n     Runs Jacob's custom NMAP command\n"
+    printf " -u     Installs updates based on system version\n"
+    printf " -i     Installs updates AND useful packages\n"
+    exit 1;;
+u) 
+    printf " update portion of script not yet implemented\n"
+    exit 1;;
+i) 
+    printf "update and install portion of script not yet implemented"
+    exit 1;;
+n) 
+    printf "nmap portion of script not yet implemented"
+    exit 1;;
+esac
+done
 
 
 
@@ -54,28 +69,11 @@ adtfile="tee -a $HOME/audit.txt"
 
 
 #prettyos is the name displayed to user, name is the name for use later in package manager
-cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2 | $adtfile
+$osOut = cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2
+echo $osOut | $adtfile
 
 
 #alpine linux will not be at regionals
-if [ "$osOut" == "Alpine Linux" ] ; then
-    alpinelp=1
-    while [ "$alpinelp" == 1 ] ; do
-        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
-        read -r alpinechoice
-            case "$alpinechoice" in 
-            Y|y) apk update && apk upgrade && apk install bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
-            alpinelp=0;;
-            N|n) alpinelp=0;; 
-            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
-            *) printf "invalid choice" 
-        esac
-    done
-fi
-
-
-
-
 if  grep -i "alpine" /etc/os-release ; then
     alpinelp=1
     while [ "$alpinelp" == 1 ] ; do
