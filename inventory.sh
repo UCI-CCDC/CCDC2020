@@ -19,11 +19,17 @@
 # set script to check for non-default cron jobs
     # also wouldn't be a bad idea to make the script automatically upload the audit to 0x0.st (have it start the file off with the machine's IP and hostname)
 #is it possible to automate verifying permissions on important files?
+#
+#
+#any flag other than updates & installs should exit immediately after being run to avoid re-running main script
+#automate backups?
 
 if [[ $EUID -ne 0 ]]; then
 	printf 'Must be run as root, exiting!\n'
 	exit 1
 fi
+
+
 
 updateOS() {
     printf "this would be the update OS function, if someone finally fucking implemented it"
@@ -53,7 +59,8 @@ i)
     printf "update and install portion of script not yet implemented"
     exit 1;;
 n) 
-    printf "nmap portion of script not yet implemented"
+    printf "Running NMAP command, text and visual xml output created in current directory"
+    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml IP_ADDRESS/24
     exit 1;;
 esac
 done
@@ -63,13 +70,24 @@ done
 
 #log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
 
+'''
+        _________ ______
+    ___/   \     V      \
+   /  ^    |\    |\      \
+  /_O_/\  / /    | ‾‾‾\  |
+ //     \ |‾‾‾\_ |     ‾‾
+//      _\|    _\|
 
-printf "\n*** generating audit.txt in your root home directory\n"
-touch $HOME/audit.txt 
-adtfile="tee -a $HOME/audit.txt"
+      zot zot, thots.
+'''
 
+printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
+mkdir $HOME/inv/
+touch $HOME/inv/audit.txt 
+adtfile="tee -a $HOME/inv/audit.txt"
+cat /etc/hostname | $adtfile
 
-#prettyos is the name displayed to user, name is the name for use later in package manager
+#osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 printf "This machine's OS is "
 #The super fucked formatting below this prints out prettyname, but in red text
@@ -152,16 +170,3 @@ echo -e "\e[34m$services\e[0m" | $adtfile
 #     echo something went wrong with making bash profile track time! 
 # fi
 
-
-#this is currently broken
-# printf 'wgetting git harden.sh please run eventually, if this fails go into inventory.sh and get the file'
-# if hash wget 2>/dev/null ; then
-#     wget https://git.io/Jvq37
-# else
-#     echo wget failed, file is https://git.io/Jvq37
-
-# fi
-
-
-#curl -
-#pull the external audit.sh script
