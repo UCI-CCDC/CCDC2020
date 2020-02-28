@@ -54,8 +54,10 @@ installPackages() {
 }
 
 
-ShouldUpdate=0
-ShouldInstall=0
+#below should be 0,0, pls fix
+ShouldUpdate=1
+ShouldInstall=1
+
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
@@ -191,11 +193,11 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if ["$ShouldUpdate" = true]; then
+if [ "$ShouldUpdate" = true ] ; then
     updateOS
 fi
 
-if ["$ShouldInstall" = true]; then
+if [ "$ShouldInstall" = true ] ; then
     installPackages
 fi
 
