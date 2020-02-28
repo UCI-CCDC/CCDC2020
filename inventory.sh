@@ -67,7 +67,9 @@ n)
 
 \?) echo "incorrect syntax, use -h for help"
     exit 1;;
-    
+
+:)  echo "invalid option: $OPTARG requires an argument"
+    exit 1;;
 esac
 done
 
