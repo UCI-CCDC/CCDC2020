@@ -55,8 +55,8 @@ installPackages() {
 
 
 #below should be 0,0, pls fix
-ShouldUpdate=1
-ShouldInstall=1
+ShouldUpdate=true
+ShouldInstall=true
 
 
 #this is for accepting flags to perform different operations
