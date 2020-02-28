@@ -74,7 +74,6 @@ h)
     exit 1;;
 u) 
     ShouldUpdate=true
-    updateOS
     #this portion of the script will be built into the update function higher up in the script
     #this will allow both -u and -i to call the same update functionality
     #it will also rely on the OS name in order to determine what package manager to use to install updates
@@ -193,11 +192,11 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if [ "$ShouldUpdate" = true ] ; then
+if [ "$ShouldUpdate" = "true" ] ; then
     updateOS
 fi
 
-if [ "$ShouldInstall" = true ] ; then
+if [ "$ShouldInstall" = "true" ] ; then
     installPackages
 fi
 
