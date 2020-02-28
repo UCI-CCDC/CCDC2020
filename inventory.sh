@@ -34,9 +34,28 @@ fi
 
 
 updateOS() {
-    printf "this would be the update OS function, if someone finally fucking implemented it"
+    osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
+
+    if [osName='Ubuntu' || osName='Debian' || osName='Raspbian']; then
+        apt-get update 
+    fi
+
+    if [osName='CentOS' || osName='Scientific Linux' || osName='Oracle Linux' || osName='Red Hat Enterprise Linux']; then
+        yum update
+        #yum update preserves obsolete packages, which is better for us since we don't want stuff to break
+    fi
+
 
 }
+
+installPackages() {
+    printf "this function will be used to install important/essential packages on barebones systems"
+    #curl,sudo,
+}
+
+
+ShouldUpdate="0"
+ShouldInstall="0"
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
@@ -52,23 +71,29 @@ h)
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
 u) 
-    printf "update portion of script not yet implemented\n"
+    ShouldUpdate="1"
+    updateOS
     #this portion of the script will be built into the update function higher up in the script
     #this will allow both -u and -i to call the same update functionality
     #it will also rely on the OS name in order to determine what package manager to use to install updates
-    exit 1;;
+
+    #WE SHOULD MAKE THE UPDATE FUNCTIONALITY RUN AT THE END OF THE SCRIPT, INSTEAD OF THE BEGINNING
+    ;;
 i) 
-    printf "update and install portion of script not yet implemented"
-    exit 1;;
+    printf "update and install portion of script not yet implemented\n"
+    ShouldUpdate="1"
+    ShouldInstall="1";;
+
 n) 
     printf "Running NMAP command, text and visual xml output created in current directory"
     nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $OPTARG/24
     exit 1;;
 
+#both of these are error handling. The top one handles incorrect flags, the bottom one handles when no argument is passed for a flag that requires one
 \?) echo "incorrect syntax, use -h for help"
     exit 1;;
 
-:)  echo "invalid option: $OPTARG requires an argument"
+:)  echo "invalid option: -$OPTARG requires an argument"
     exit 1;;
 esac
 done
@@ -95,6 +120,8 @@ cat /etc/hostname | $adtfile
 
 #osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
+
+
 printf "This machine's OS is "
 #The super fucked formatting below this prints out prettyname, but in red text
 echo -e "\e[31m$osOut\e[0m" | $adtfile
@@ -160,6 +187,16 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 printf '\n**services you should cry about***\n'
 services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
 echo -e "\e[34m$services\e[0m" | $adtfile
+
+
+if [ShouldUpdate]; then
+    updateOS
+fi
+
+if [ShouldInstall]; then
+    installPackages
+fi
+
 
 
 
