@@ -71,7 +71,7 @@ h)
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
 u) 
-    ShouldUpdate=1
+    ShouldUpdate=true
     updateOS
     #this portion of the script will be built into the update function higher up in the script
     #this will allow both -u and -i to call the same update functionality
@@ -81,8 +81,9 @@ u)
     ;;
 i) 
     printf "update and install portion of script not yet implemented\n"
-    ShouldUpdate=1
-    ShouldInstall=1;;
+    ShouldUpdate=true
+    ShouldInstall=true
+    ;;
 
 n) 
     printf "Running NMAP command, text and visual xml output created in current directory"
@@ -190,11 +191,11 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if ["$ShouldUpdate"==1]; then
+if ["$ShouldUpdate" = true]; then
     updateOS
 fi
 
-if ["$ShouldInstall"==1]; then
+if ["$ShouldInstall" = true]; then
     installPackages
 fi
 
