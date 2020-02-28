@@ -162,7 +162,7 @@ fi
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
-    printf "Sudoers"
+    printf "Sudoers\n"
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
@@ -190,11 +190,11 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if [ShouldUpdate=1]; then
+if [ShouldUpdate==1]; then
     updateOS
 fi
 
-if [ShouldInstall=1]; then
+if [ShouldInstall==1]; then
     installPackages
 fi
 
