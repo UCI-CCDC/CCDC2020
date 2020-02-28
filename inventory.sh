@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # https://github.com/UCI-CCDC/CCDC2020
+# script raw is at https://git.io/uciccdc20
 #UCI CCDC linux inventory script for os detection and to speed up general operations
 
 #Written by UCI CCDC linux subteam
 #UCI CCDC, 2020
 
 
+
 # - (-h) help functionality to list flags
 # - (-n) flag to run nmap script
 # - (-u) flag to install updates
-# - (- ) flag to harden system (flag not decided, -h already taken)
+# - (- ) flag to harden system (flag not decided, -h already taken): maybe use -x?
 # - (-i) flag to install updates, and then install packages that are useful and check for basic utilities (nmap, tmux, tshark )[curl, man, vim]
 # - set it to run it's usual thing if no flags given
 
@@ -38,7 +40,7 @@ updateOS() {
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
-while getopts huin option
+while getopts :huin: option
 do
 case "${option}"
 in
@@ -60,15 +62,17 @@ i)
     exit 1;;
 n) 
     printf "Running NMAP command, text and visual xml output created in current directory"
-    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml IP_ADDRESS/24
+    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $OPTARG/24
     exit 1;;
+
+\?) echo "incorrect syntax, use -h for help"
+    exit 1;;
+    
 esac
 done
 
 
 
-
-#log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
 
 '''
         _________ ______
