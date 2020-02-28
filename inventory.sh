@@ -111,6 +111,7 @@ done
 
       zot zot, thots.
 '''
+#there's an error being thrown at this point in the script for ": no such file or directory"
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
 mkdir $HOME/inv/
@@ -189,11 +190,11 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if [ShouldUpdate]; then
+if [ShouldUpdate="1"]; then
     updateOS
 fi
 
-if [ShouldInstall]; then
+if [ShouldInstall="1"]; then
     installPackages
 fi
 
