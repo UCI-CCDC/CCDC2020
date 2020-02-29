@@ -35,7 +35,7 @@ fi
 
 updateOS() {
     
-    osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
+    osName=${$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)//.}
     printf "OS detected: $osName\n"
 
     echo "below is the osName"
