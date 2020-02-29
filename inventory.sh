@@ -139,17 +139,16 @@ done
 
 
 
-echo "
-'''
+echo '
+
         _________ ______
-    ___/   \     V      \\
-   /  ^    |\    |\      \\
-  /_O_/\  / /    | ‾‾‾\  |
- //     \ |‾‾‾\_ |     ‾‾
+    ___/   \     V     \\
+   /  ^    |\    |\     \\
+  /_O_/\  / /    | \‾\‾\\  |
+ //     \ |\‾\‾\‾\_ |     \‾\‾
 //      _\|    _\|
 
-      zot zot, thots.
-'''"
+      zot zot, thots.'
 #there's an error being thrown at this point in the script for ": no such file or directory"
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
