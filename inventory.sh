@@ -38,6 +38,9 @@ updateOS() {
     osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
     printf "OS detected: $osName\n"
 
+    echo "below is the osName"
+    echo $osName
+
     if [ "$osName" = "Ubuntu" ] || [ "$osName" = "Debian" ] || [ "$osName" = "Raspbian" ]; then
         printf "Updating system using apt-get\n"
         apt-get update 
@@ -61,6 +64,7 @@ installPackages() {
 ShouldUpdate=true
 ShouldInstall=false
 
+echo $ShouldUpdate
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
