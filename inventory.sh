@@ -101,8 +101,8 @@ h)
     printf "    ==============Options==============\n"
     printf " -h     Prints this help menu\n"
     printf " -n     Runs Jacob's custom NMAP command\n"
-    printf " -m     Runs custom NMAP command, but IP subnet must be passed as an argument after flag (ex: -m 192.168.1.0)"
-    printf " -x     Hardens System (not yet implemented)"
+    printf " -m     Runs custom NMAP command, but IP subnet must be passed as an argument (ex: -m 192.168.1.0)\n"
+    printf " -x     Hardens System (not yet implemented)\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
@@ -139,17 +139,17 @@ done
 
 
 
-
+echo "
 '''
         _________ ______
-    ___/   \     V      \
-   /  ^    |\    |\      \
+    ___/   \     V      \\
+   /  ^    |\    |\      \\
   /_O_/\  / /    | ‾‾‾\  |
  //     \ |‾‾‾\_ |     ‾‾
 //      _\|    _\|
 
       zot zot, thots.
-'''
+'''"
 #there's an error being thrown at this point in the script for ": no such file or directory"
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
@@ -157,7 +157,7 @@ mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
 touch $HOME/inv/audit.txt 
 adtfile="tee -a $HOME/inv/audit.txt"
 
-echo -e "\e[92mThe hostname is: $(hostname)\e[0m" | $adtfile
+echo -e "\n\e[92mThe hostname is: $(hostname)\e[0m" | $adtfile
 
 #osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
