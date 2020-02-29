@@ -122,7 +122,8 @@ printf "\n*** generating inv direcory and audit.txt in your root home directory\
 mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
 touch $HOME/inv/audit.txt 
 adtfile="tee -a $HOME/inv/audit.txt"
-cat /etc/hostname | $adtfile
+
+echo -e "\e[92mThe hostname is: $(cat /etc/hostname)\e[0m" | $adtfile
 
 #osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
@@ -195,15 +196,15 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-echo "shouldUpdate is equal to $ShouldUpdate" for debugging
+echo "shouldUpdate is equal to $ShouldUpdate" #for debugging
 echo "shouldInstall is equal to $ShouldInstall"
 
 
-if [ '$ShouldUpdate' = 'true' ]; then
+if [ "$ShouldUpdate" = "true" ]; then
     updateOS
 fi
 
-if [ '$ShouldInstall' = 'true' ]; then
+if [ "$ShouldInstall" = "true" ]; then
     installPackages
 fi
 
