@@ -128,7 +128,6 @@ echo -e "\e[92mThe hostname is: $(cat /etc/hostname)\e[0m" | $adtfile
 #osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 
-
 printf "This machine's OS is "
 echo -e "\e[31m$osOut\e[0m" | $adtfile
 
@@ -150,7 +149,6 @@ if  grep -i "alpine" /etc/os-release ; then
 fi
 
 printf "\n***IP ADDRESSES***\n"
-if  hash ip addr 2>/dev/null  ; then
 echo -e "\e[95mMain IP (me thinks): $(hostname -I | awk '{print $1}')\e[0m"
 echo "All IP Addresses: $(hostname -I)" | $adtfile
 
