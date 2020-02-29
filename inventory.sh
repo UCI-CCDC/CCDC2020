@@ -37,13 +37,13 @@ updateOS() {
     printf "updating system now"
     
     osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
-    prinf 'OS detected: $osName'
+    printf 'OS detected: $osName'
 
-    if [ osName='Ubuntu' || osName='Debian' || osName='Raspbian' ]; then
+    if [ "$osName"="Ubuntu" || "$osName"="Debian" || "$osName"="Raspbian" ]; then
         apt-get update 
     fi
 
-    if [ osName='CentOS' || osName='Scientific Linux' || osName='Oracle Linux' || osName='Red Hat Enterprise Linux' ]; then
+    if [ "$osName"="CentOS" || "$osName"="Scientific Linux" || "$osName"="Oracle Linux" || "$osName"="Red Hat Enterprise Linux" ]; then
         yum update
         
     fi
