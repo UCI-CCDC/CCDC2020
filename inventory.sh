@@ -35,7 +35,8 @@ fi
 
 updateOS() {
     
-    osName=${$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)//\"}
+    tempName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
+    osName=${tempName//\"}      #removes double quotes from os name so that it'll actually fucking work with the if statement
     printf "OS detected: $osName\n"
 
     echo "below is the osName"
