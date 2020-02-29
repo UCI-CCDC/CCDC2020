@@ -34,15 +34,18 @@ fi
 
 
 updateOS() {
+    printf "updating system now"
+    
     osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
+    prinf 'OS detected: $osName'
 
-    if [osName='Ubuntu' || osName='Debian' || osName='Raspbian']; then
+    if [ osName='Ubuntu' || osName='Debian' || osName='Raspbian' ]; then
         apt-get update 
     fi
 
-    if [osName='CentOS' || osName='Scientific Linux' || osName='Oracle Linux' || osName='Red Hat Enterprise Linux']; then
+    if [ osName='CentOS' || osName='Scientific Linux' || osName='Oracle Linux' || osName='Red Hat Enterprise Linux' ]; then
         yum update
-        #yum update preserves obsolete packages, which is better for us since we don't want stuff to break
+        
     fi
 
 
@@ -56,7 +59,7 @@ installPackages() {
 
 #below should be 0,0, pls fix
 ShouldUpdate=true
-ShouldInstall=true
+ShouldInstall=false
 
 
 #this is for accepting flags to perform different operations
