@@ -34,20 +34,20 @@ fi
 
 
 updateOS() {
-    printf "updating system now\n"
     
     osName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
     printf "OS detected: $osName\n"
 
     if [ "$osName" = "Ubuntu" ] || [ "$osName" = "Debian" ] || [ "$osName" = "Raspbian" ]; then
+        printf "Updating system using apt-get\n"
         apt-get update 
     fi
 
     if [ "$osName" = "CentOS" ] || [ "$osName" = "Scientific Linux" ] || [ "$osName" = "Oracle Linux" ] || [ "$osName" = "Red Hat Enterprise Linux" ]; then
+        printf "Updating system using yum\n"
         yum update
         
     fi
-
 
 }
 
@@ -84,7 +84,6 @@ u)
     #WE SHOULD MAKE THE UPDATE FUNCTIONALITY RUN AT THE END OF THE SCRIPT, INSTEAD OF THE BEGINNING
     ;;
 i) 
-    printf "update and install portion of script not yet implemented\n"
     ShouldUpdate=true
     ShouldInstall=true
     ;;
