@@ -57,7 +57,7 @@ installPackages() {
 }
 
 
-#below should be 0,0, pls fix
+#below should both be false
 ShouldUpdate=true
 ShouldInstall=false
 
@@ -119,7 +119,7 @@ done
 #there's an error being thrown at this point in the script for ": no such file or directory"
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
-mkdir $HOME/inv/
+mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
 touch $HOME/inv/audit.txt 
 adtfile="tee -a $HOME/inv/audit.txt"
 cat /etc/hostname | $adtfile
@@ -195,11 +195,15 @@ services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clam
 echo -e "\e[34m$services\e[0m" | $adtfile
 
 
-if [ "$ShouldUpdate" = "true" ] ; then
+echo "shouldUpdate is equal to $ShouldUpdate" for debugging
+echo "shouldInstall is equal to $ShouldInstall"
+
+
+if [ '$ShouldUpdate' = 'true' ]; then
     updateOS
 fi
 
-if [ "$ShouldInstall" = "true" ] ; then
+if [ '$ShouldInstall' = 'true' ]; then
     installPackages
 fi
 
