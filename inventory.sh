@@ -65,14 +65,14 @@ ShouldInstall=false
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
-while getopts :huin: option
+while getopts :huinm: option
 do
-case "${option}"
-in
+case "${option}" in
 h) 
     printf "\n UCI CCDC 2020 Linux Inventory Script\n"
     printf " -h     Prints this help menu\n"
     printf " -n     Runs Jacob's custom NMAP command\n"
+    printf " -m     Runs custom NMAP command, but IP subnet must be passed as an argument after flag (ex: -m 192.168.1.0)"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
@@ -91,6 +91,11 @@ i)
 
 n) 
     printf "Running NMAP command, text and visual xml output created in current directory"
+    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $(hostname -I | awk '{print $1}')/24
+    exit 1;;
+    
+m) 
+    printf "Running NMAP command with user specificed subnet, text and visual xml output created in current directory"
     nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $OPTARG/24
     exit 1;;
 
@@ -148,15 +153,16 @@ if  grep -i "alpine" /etc/os-release ; then
     done
 fi
 
-printf "\n***IP ADDRESSES***\n"
-echo -e "\e[95mMain IP (me thinks): $(hostname -I | awk '{print $1}')\e[0m"
+echo -e "\n\e[95m***IP ADDRESSES***\e[0m\n"
+echo "Main IP (me thinks): $(hostname -I | awk '{print $1}')"
 echo "All IP Addresses: $(hostname -I)" | $adtfile
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
-    printf "Sudoers\n"
+    printf "\nSudoers\n"
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
+
 
 # ## Less Fancy /etc/shadow
 printf "Passwordless accounts: "
