@@ -37,10 +37,7 @@ updateOS() {
     
     tempName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
     osName=${tempName//\"}      #removes double quotes from os name so that it'll actually fucking work with the if statement
-    printf "OS detected: $osName\n"
-
-    echo "below is the osName"
-    echo $osName
+    printf "Updating System Now OS detected: $osName\n"
 
     if [ "$osName" = "Ubuntu" ] || [ "$osName" = "Debian" ] || [ "$osName" = "Raspbian" ]; then
         printf "Updating system using apt-get\n"
@@ -62,10 +59,9 @@ installPackages() {
 
 
 #below should both be false
-ShouldUpdate=true
+ShouldUpdate=false
 ShouldInstall=false
 
-echo $ShouldUpdate
 
 #this is for accepting flags to perform different operations
 #if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
@@ -134,7 +130,6 @@ osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 
 
 printf "This machine's OS is "
-#The super fucked formatting below this prints out prettyname, but in red text
 echo -e "\e[31m$osOut\e[0m" | $adtfile
 
 
@@ -154,21 +149,10 @@ if  grep -i "alpine" /etc/os-release ; then
     done
 fi
 
-
-#THIS IS CURRENTLY BROKEN
 printf "\n***IP ADDRESSES***\n"
 if  hash ip addr 2>/dev/null  ; then
-ip addr | awk '
-/^[0-9]+:/ {
-  sub(/:/,"",$2); iface=$2 }
-/^[[:space:]]*inet / {
-  split($2, a, "/")
-  print iface" : "a[1]
-}' | $adtfile
-fi
-
-
-
+echo -e "\e[95mMain IP (me thinks): $(hostname -I | awk '{print $1}')\e[0m"
+echo "All IP Addresses: $(hostname -I)" | $adtfile
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
@@ -176,9 +160,7 @@ if [ -f /etc/sudoers ] ; then
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
-#this doesn't work
 # ## Less Fancy /etc/shadow
-# this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
 printf "Passwordless accounts: "
 awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
 echo;
@@ -198,10 +180,6 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 printf '\n**services you should cry about***\n'
 services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
 echo -e "\e[34m$services\e[0m" | $adtfile
-
-
-echo "shouldUpdate is equal to $ShouldUpdate" #for debugging
-echo "shouldInstall is equal to $ShouldInstall"
 
 
 if [ "$ShouldUpdate" = "true" ]; then
@@ -228,3 +206,5 @@ fi
 #     echo something went wrong with making bash profile track time! 
 # fi
 
+
+# this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
