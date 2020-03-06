@@ -1,78 +1,166 @@
 #!/bin/bash
 
+########################################################
 # https://github.com/UCI-CCDC/CCDC2020
+# script raw is at https://git.io/uciccdc20
+# to install: wget https://git.io/uciccdc20 -O inv.sh && chmod +x inv.sh
 #UCI CCDC linux inventory script for os detection and to speed up general operations
 
 #Written by UCI CCDC linux subteam
 #UCI CCDC, 2020
+########################################################
 
-
-# - (-h) help functionality to list flags
-# - (-n) flag to run nmap script
-# - (-u) flag to install updates
-# - (- ) flag to harden system (flag not decided, -h already taken)
-# - (-i) flag to install updates, and then install packages that are useful and check for basic utilities (nmap, tmux, tshark )[curl, man, vim]
-# - set it to run it's usual thing if no flags given
-
-
+# Features to add -----------------------------
 # are sql  password changes automatable? 
 # set script to check for non-default cron jobs
-    # also wouldn't be a bad idea to make the script automatically upload the audit to 0x0.st (have it start the file off with the machine's IP and hostname)
+    # automatically upload the audit to 0x0.st? kinda a security risk (have it start the file off with the machine's IP and hostname)
 #is it possible to automate verifying permissions on important files?
+#
+#automate backups?
+
+# TODO -----------------------------------------
+# add installPackages functionality
+# Add system hardening under -x flag
+# fix the minor errors that are output to console when run:
+    # the "no such file or directory" after the anteater
+    # mkdir returns an error when the /root/inv directory has already been created. Should we remove/redirect that?
+# Test on other systems
+    #Raspbian
+    # Debian
+    #CentOS
+    #Scientific Linux
+    # Oracle Linux
+    # RHEL
+# Move alpine functionality to different part of script?
 
 if [[ $EUID -ne 0 ]]; then
 	printf 'Must be run as root, exiting!\n'
 	exit 1
 fi
 
+
+
 updateOS() {
-    printf "this would be the update OS function, if someone finally fucking implemented it"
+    
+    # tempName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
+    # osName=${tempName//\"}      #removes double quotes from os name so that it'll actually fucking work with the if statement
+    # printf "Updating System Now OS detected: $osName\n"
+
+    # if [ "$osName" = "Ubuntu" ] || [ "$osName" = "Debian" ] || [ "$osName" = "Raspbian" ]; then
+    #     printf "Updating system using apt-get\n"
+    #     apt-get update 
+    # fi
+
+    # if [ "$osName" = "CentOS" ] || [ "$osName" = "Scientific Linux" ] || [ "$osName" = "Oracle Linux" ] || [ "$osName" = "Red Hat Enterprise Linux" ]; then
+    #     printf "Updating system using yum\n"
+    #     yum update
+        
+    # fi
+
+    ## Install & update utilities
+    if [ $(which apt-get) ]; then # Debian based
+        apt-get update -y -q
+    elif [ $(which yum) ]; then
+        yum update
+    elif [ $(which pacman) ]; then 
+        pacman -Syy
+        pacman -Su
+    elif [ $(which apk) ]; then # Alpine
+        apk update
+        apk upgrade
+    fi
 
 }
 
-#this is for accepting flags to perform different operations
-#if a flag is supposed to accept user input after being called (ex -f "hello"), it is followed by a : after getopts in the while statement
-while getopts huin option
+installPackages() {
+    printf "this function will be used to install important/essential packages on barebones systems"
+    #curl, sudo, nmap, tmux, tshark, man, vim, hostname
+}
+
+
+harden() { 
+    printf "We are now doing system hardening\n"
+
+    wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/jacob/harden.sh -O harden.sh && bash harden.sh
+    #I'm lazy af, this calls the hardening script and runs it. Hope it works
+}
+
+
+#below should both be false
+ShouldUpdate=false
+ShouldInstall=false
+
+# this fucker is the flag statement
+while getopts :huixnm: option
 do
-case "${option}"
-in
+case "${option}" in
 h) 
     printf "\n UCI CCDC 2020 Linux Inventory Script\n"
+    prinf "Note: all options other than the update functions will result in the main script not being run."
+
+    printf "    ==============Options==============\n"
     printf " -h     Prints this help menu\n"
     printf " -n     Runs Jacob's custom NMAP command\n"
+    printf " -m     Runs custom NMAP command, but IP subnet must be passed as an argument (ex: -m 192.168.1.0)\n"
+    printf " -x     Hardens System (not yet implemented)\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
     exit 1;;
 u) 
-    printf "update portion of script not yet implemented\n"
-    #this portion of the script will be built into the update function higher up in the script
-    #this will allow both -u and -i to call the same update functionality
-    #it will also rely on the OS name in order to determine what package manager to use to install updates
-    exit 1;;
+    ShouldUpdate=true
+    ;;
 i) 
-    printf "update and install portion of script not yet implemented"
+    ShouldUpdate=true
+    ShouldInstall=true
+    ;;
+
+x)
+    harden          #calls hardening function above
     exit 1;;
+
 n) 
-    printf "nmap portion of script not yet implemented"
+    printf "Running NMAP command, text and visual xml output created in current directory"
+    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $(hostname -I | awk '{print $1}')/24
+    exit 1;;
+
+m) 
+    printf "Running NMAP command with user specificed subnet, text and visual xml output created in current directory"
+    nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $OPTARG/24
+    exit 1;;
+
+#both of these are error handling. The top one handles incorrect flags, the bottom one handles when no argument is passed for a flag that requires one
+\?) echo "incorrect syntax, use -h for help"
+    exit 1;;
+
+:)  echo "invalid option: -$OPTARG requires an argument"
     exit 1;;
 esac
 done
 
 
 
+echo '
+        _________ ______
+    ___/   \     V     \
+   /  ^    |\    |\     \
+  /_O_/\  / /    | ‾‾\  |
+ //     \ |‾‾‾\_ |     ‾‾
+//      _\|    _\|
 
-#log () { printf "\033[01;30m$(date)\033[0m: $1\n" }
+      zot zot, thots.'
+#there's an error being thrown at this point in the script for ": no such file or directory"
 
+printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
+mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
+touch $HOME/inv/audit.txt 
+adtfile="tee -a $HOME/inv/audit.txt"
 
-printf "\n*** generating audit.txt in your root home directory\n"
-touch $HOME/audit.txt 
-adtfile="tee -a $HOME/audit.txt"
+echo -e "\n\e[92mThe hostname is: $(hostname)\e[0m" | $adtfile
 
-
-#prettyos is the name displayed to user, name is the name for use later in package manager
+#osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
+
 printf "This machine's OS is "
-#The super fucked formatting below this prints out prettyname, but in red text
 echo -e "\e[31m$osOut\e[0m" | $adtfile
 
 
@@ -92,42 +180,29 @@ if  grep -i "alpine" /etc/os-release ; then
     done
 fi
 
-
-#THIS IS CURRENTLY BROKEN
-printf "\n***IP ADDRESSES***\n"
-if  hash ip addr 2>/dev/null  ; then
-ip addr | awk '
-/^[0-9]+:/ {
-  sub(/:/,"",$2); iface=$2 }
-/^[[:space:]]*inet / {
-  split($2, a, "/")
-  print iface" : "a[1]
-}' | $adtfile
-fi
-
-
-
+echo -e "\n\e[95m***IP ADDRESSES***\e[0m"
+echo "Most recent IP: $(hostname -I | awk '{print $1}')"
+echo "All IP Addresses: $(hostname -I)" | $adtfile
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
-    printf "Sudoers"
+    printf "\nSudoers\n"
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
-#this doesn't work
+
 # ## Less Fancy /etc/shadow
-# this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
 printf "Passwordless accounts: "
 awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
 echo;
 
-printf "\n***USERS IN SUDO GROUP***\n"
+echo -e "\n\e[93m***USERS IN SUDO GROUP***\e[0m\n"
 grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
 
-printf "\n***USERS IN ADMIN GROUP***\n"
+printf "\n\e[93m***USERS IN ADMIN GROUP***\e[0m\n"
 grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
 
-printf "\n***USERS IN WHEEL GROUP***\n"
+printf "\n\e[93m***USERS IN WHEEL GROUP***\e[0m\n"
 grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 
@@ -135,7 +210,19 @@ grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 #saves services to variable, prints them out to terminal in blue
 printf '\n**services you should cry about***\n'
 services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
-echo -e "\e[34m$services\e[0m" | $adtfile
+echo -e "\e[34m"
+echo $services | $adtfile
+echo -e "\e[0m" #formatting so audit file is less fucked with the color markers
+
+
+if [ "$ShouldUpdate" = "true" ]; then
+    updateOS
+fi
+
+if [ "$ShouldInstall" = "true" ]; then
+    installPackages
+fi
+
 
 
 
@@ -153,15 +240,4 @@ echo -e "\e[34m$services\e[0m" | $adtfile
 # fi
 
 
-#this is currently broken
-# printf 'wgetting git harden.sh please run eventually, if this fails go into inventory.sh and get the file'
-# if hash wget 2>/dev/null ; then
-#     wget https://git.io/Jvq37
-# else
-#     echo wget failed, file is https://git.io/Jvq37
-
-# fi
-
-
-#curl -
-#pull the external audit.sh script
+# this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
