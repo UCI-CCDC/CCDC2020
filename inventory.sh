@@ -86,7 +86,7 @@ ShouldUpdate=false
 ShouldInstall=false
 
 # this fucker is the flag statement
-while getopts :huixnsrm: option
+while getopts :huixnsr:m: option
 do
 case "${option}" in
 h) 
@@ -101,7 +101,7 @@ h)
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
     printf " -s     Backups MYSQL databases and config files\n"
-    printf " -r     Restore MYSQL database from backup tar archive\n"
+    printf " -r     Restore MYSQL database from backup tar archive (passed as argument)\n"
 
     printf "\n\n\n"
     exit 1;;
@@ -142,19 +142,19 @@ s)
     exit 1;;
 
 r)
-    printf "Restoring MYSQL database from $2"
+    printf "Restoring MYSQL database from $OPTARG"
     #sql database recovery, not yet verified to work
     
-    if [[ $# -lt 2 ]]; then
-        printf 'Must specify an input file!\n'
-        exit 1
-    fi
     read -s -p "Enter root pass: " pass
+
     mkdir restore-sql
-    tar -xzf "$2" -C restore-sql
+
+    tar -xzf "$OPTARG" -C restore-sql
     for db in restore-sql/*.sql; do
         mysql -u root -p$pass < "$db"
     done
+
+    exit 1;;
 
 
 #both of these are error handling. The top one handles incorrect flags, the bottom one handles when no argument is passed for a flag that requires one
