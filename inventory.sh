@@ -100,7 +100,9 @@ h)
     printf " -x     Hardens System (not yet implemented)\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
-    printf " -s     Backups mysql databases and config files"
+    printf " -s     Backups mysql databases and config files\n"
+
+    printf "\n\n\n"
     exit 1;;
 u) 
     ShouldUpdate=true
@@ -125,13 +127,13 @@ m)
     exit 1;;
 
 s)
-    printf "Backing up MYSQL databases and config files"
+    printf "Backing up MYSQL databases and config files\n"
     
     mkdir -p $HOME/sql-backup
         
-    read -ps "Enter root password for mysql database " pass
+    read -s -p "Enter root password for mysql database\n" pass
     for db in $(mysql -u root -p$pass -e 'show databases' --skip-column-names); do
-        mysqldump -u root -p "$db" > "$HOME/sql-backup/$db.sql"
+        mysqldump -u root -p$pass "$db" > "$HOME/sql-backup/$db.sql"
     done
     cp  -r /etc/mysql /$HOME/sql-backup/
     tar -czf $HOME/$HOSTNAME-sqlbackup.tgz $HOME/sql-backup
