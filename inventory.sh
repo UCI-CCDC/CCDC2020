@@ -142,15 +142,15 @@ s)
     exit 1;;
 
 r)
-    printf "Restoring MYSQL database from $OPTARG"
+    printf "Restoring MYSQL database from $OPTARG \n"
     #sql database recovery, not yet verified to work
     
     read -s -p "Enter root pass: " pass
-
+    printf "\n"
     mkdir restore-sql
 
-    tar -xzf "$OPTARG" -C restore-sql
-    for db in restore-sql/*.sql; do
+    tar -xzf "$OPTARG" -C restore-sql/
+    for db in $(find restore-sql/ -name *.sql); do
         mysql -u root -p$pass < "$db"
     done
 
