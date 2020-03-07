@@ -152,8 +152,8 @@ r)
     tar -xzf "$OPTARG" -C restore-sql/
     for db in $(find restore-sql/ -name *.sql); do
         bdb=$(basename $db)
-        mysql -u root -p$pass create "${bdb%.sql}"
-        mysql -u root -p$pass --database=${bdb%.sql} < "$db"
+        mysql -u root -p$pass -e "create database ${bdb%.sql};"
+        mysql -u root -p$pass ${bdb%.sql} < "$db"
     done
 
     exit 1;;
