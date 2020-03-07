@@ -151,7 +151,7 @@ r)
 
     tar -xzf "$OPTARG" -C restore-sql/
     for db in $(find restore-sql/ -name *.sql); do
-        mysql -u root -p$pass < "$db"
+        mysql -u root -p$pass --database=${db%.sql} < "$db"
     done
 
     exit 1;;
