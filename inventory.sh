@@ -86,7 +86,7 @@ ShouldUpdate=false
 ShouldInstall=false
 
 # this fucker is the flag statement
-while getopts :huixnsm: option
+while getopts :huixnsrm: option
 do
 case "${option}" in
 h) 
@@ -100,7 +100,8 @@ h)
     printf " -x     Hardens System (not yet implemented)\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
-    printf " -s     Backups mysql databases and config files\n"
+    printf " -s     Backups MYSQL databases and config files\n"
+    printf " -r     Restore MYSQL database from backup tar archive\n"
 
     printf "\n\n\n"
     exit 1;;
@@ -131,7 +132,7 @@ s)
     
     mkdir -p $HOME/sql-backup
         
-    read -s -p "Enter root password for mysql database\n" pass
+    read -s -p "Enter root password for mysql database  " pass
     for db in $(mysql -u root -p$pass -e 'show databases' --skip-column-names); do
         mysqldump -u root -p$pass "$db" > "$HOME/sql-backup/$db.sql"
     done
@@ -139,6 +140,22 @@ s)
     tar -czf $HOME/$HOSTNAME-sqlbackup.tgz $HOME/sql-backup
 
     exit 1;;
+
+r)
+    printf "Restoring MYSQL database from $2"
+    #sql database recovery, not yet verified to work
+    
+    if [[ $# -lt 2 ]]; then
+        printf 'Must specify an input file!\n'
+        exit 1
+    fi
+    read -s -p "Enter root pass: " pass
+    mkdir restore-sql
+    tar -xzf "$2" -C restore-sql
+    for db in restore-sql/*.sql; do
+        mysql -u root -p$pass < "$db"
+    done
+
 
 #both of these are error handling. The top one handles incorrect flags, the bottom one handles when no argument is passed for a flag that requires one
 \?) echo "incorrect syntax, use -h for help"
