@@ -12,6 +12,7 @@
 
 # Features to add -----------------------------
 # are sql  password changes automatable? 
+# AUTOMATE SQL BACKUP
 # set script to check for non-default cron jobs
     # automatically upload the audit to 0x0.st? kinda a security risk (have it start the file off with the machine's IP and hostname)
 #is it possible to automate verifying permissions on important files?
@@ -42,21 +43,6 @@ fi
 
 updateOS() {
     
-    # tempName=$(cat /etc/os-release | grep -w "NAME" | cut -d "=" -f 2)
-    # osName=${tempName//\"}      #removes double quotes from os name so that it'll actually fucking work with the if statement
-    # printf "Updating System Now OS detected: $osName\n"
-
-    # if [ "$osName" = "Ubuntu" ] || [ "$osName" = "Debian" ] || [ "$osName" = "Raspbian" ]; then
-    #     printf "Updating system using apt-get\n"
-    #     apt-get update 
-    # fi
-
-    # if [ "$osName" = "CentOS" ] || [ "$osName" = "Scientific Linux" ] || [ "$osName" = "Oracle Linux" ] || [ "$osName" = "Red Hat Enterprise Linux" ]; then
-    #     printf "Updating system using yum\n"
-    #     yum update
-        
-    # fi
-
     ## Install & update utilities
     if [ $(which apt-get) ]; then # Debian based
         apt-get update -y -q
@@ -81,7 +67,16 @@ installPackages() {
 harden() { 
     printf "We are now doing system hardening\n"
 
-    wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/jacob/harden.sh -O harden.sh && bash harden.sh
+    read -r -p "Are you sure? The harden script is currently non-functional, as of March 02 [Y/n] " response
+    case "$response" in
+        [yY][eE][sS]|[yY]) 
+            wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/jacob/harden.sh -O harden.sh && bash harden.sh
+
+            ;;
+        *)
+            exit 1;;
+    esac
+    # I know this is shit but I really don't care anymore 
     #I'm lazy af, this calls the hardening script and runs it. Hope it works
 }
 
@@ -91,7 +86,7 @@ ShouldUpdate=false
 ShouldInstall=false
 
 # this fucker is the flag statement
-while getopts :huixnm: option
+while getopts :huixnsm: option
 do
 case "${option}" in
 h) 
@@ -105,6 +100,7 @@ h)
     printf " -x     Hardens System (not yet implemented)\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
+    printf " -s     Backups mysql databases and config files"
     exit 1;;
 u) 
     ShouldUpdate=true
@@ -128,6 +124,20 @@ m)
     nmap -p- -Anvv -T4 -oN nmapOut.txt -oX nmapOutVisual.xml $OPTARG/24
     exit 1;;
 
+s)
+    printf "Backing up MYSQL databases and config files"
+    
+    mkdir -p $HOME/sql-backup
+        
+    read -ps "Enter root password for mysql database " pass
+    for db in $(mysql -u root -p$pass -e 'show databases' --skip-column-names); do
+        mysqldump -u root -p "$db" > "$HOME/sql-backup/$db.sql"
+    done
+    cp  -r /etc/mysql /$HOME/sql-backup/
+    tar -czf $HOME/$HOSTNAME-sqlbackup.tgz $HOME/sql-backup
+
+    exit 1;;
+
 #both of these are error handling. The top one handles incorrect flags, the bottom one handles when no argument is passed for a flag that requires one
 \?) echo "incorrect syntax, use -h for help"
     exit 1;;
@@ -148,7 +158,7 @@ echo '
 //      _\|    _\|
 
       zot zot, thots.'
-#there's an error being thrown at this point in the script for ": no such file or directory"
+
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
 mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
