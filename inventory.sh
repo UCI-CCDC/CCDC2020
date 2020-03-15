@@ -1,10 +1,11 @@
 #!/bin/bash
 
+
 ########################################################
 # https://github.com/UCI-CCDC/CCDC2020
 # script raw is at https://git.io/uciccdc20
 # to install: wget https://git.io/uciccdc20 -O inv.sh && chmod +x inv.sh
-#UCI CCDC linux inventory script for os detection and to speed up general operations
+#UCI CCDC linux script for inventory & common operations
 
 #Written by UCI CCDC linux subteam
 #UCI CCDC, 2020
@@ -12,7 +13,6 @@
 
 # Features to add -----------------------------
 # are sql  password changes automatable? 
-# AUTOMATE SQL BACKUP
 # set script to check for non-default cron jobs
     # automatically upload the audit to 0x0.st? kinda a security risk (have it start the file off with the machine's IP and hostname)
 #is it possible to automate verifying permissions on important files?
@@ -20,11 +20,6 @@
 #automate backups?
 
 # TODO -----------------------------------------
-# add installPackages functionality
-# Add system hardening under -x flag
-# fix the minor errors that are output to console when run:
-    # the "no such file or directory" after the anteater
-    # mkdir returns an error when the /root/inv directory has already been created. Should we remove/redirect that?
 # Test on other systems
     #Raspbian
     # Debian
@@ -39,19 +34,21 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+#functions to make shit prettier
+banner () { printf "========================================================\n"; }
 
-
+#actual functions for actual things
 updateOS() {
     
     ## Install & update utilities
-    if [ $(which apt-get) ]; then # Debian based
+    if [ $(command -v apt-get) ]; then # Debian based
         apt-get update -y -q
-    elif [ $(which yum) ]; then
+    elif [ $(command -v yum) ]; then
         yum update
-    elif [ $(which pacman) ]; then 
+    elif [ $(command -v pacman) ]; then 
         pacman -Syy
         pacman -Su
-    elif [ $(which apk) ]; then # Alpine
+    elif [ $(command -v apk) ]; then # Alpine
         apk update
         apk upgrade
     fi
@@ -61,6 +58,18 @@ updateOS() {
 installPackages() {
     printf "this function will be used to install important/essential packages on barebones systems"
     #curl, sudo, nmap, tmux, tshark, man, vim, hostname
+        if [ $(command -v apt-get) ]; then # Debian based
+            apt-get install curl sudo nmap tmux tshark man vim hostname -y -q
+
+        elif [ $(command -v yum) ]; then
+            yum update
+        elif [ $(command -v pacman) ]; then 
+            pacman -Syy
+            pacman -Su
+        elif [ $(command -v apk) ]; then # Alpine
+            apk update
+            apk upgrade
+        fi
 }
 
 
@@ -91,13 +100,13 @@ do
 case "${option}" in
 h) 
     printf "\n UCI CCDC 2020 Linux Inventory Script\n"
-    prinf "Note: all options other than the update functions will result in the main script not being run."
+    printf "Note: all options other than the update functions will result in the main script not being run."
 
     printf "    ==============Options==============\n"
     printf " -h     Prints this help menu\n"
     printf " -n     Runs Jacob's custom NMAP command\n"
     printf " -m     Runs custom NMAP command, but IP subnet must be passed as an argument (ex: -m 192.168.1.0)\n"
-    printf " -x     Hardens System (not yet implemented)\n"
+    printf " -x     Runs hardening script\n"
     printf " -u     Installs updates based on system version\n"
     printf " -i     Installs updates AND useful packages\n"
     printf " -s     Backups MYSQL databases and config files\n"
@@ -182,17 +191,21 @@ echo '
 
 
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
-mkdir $HOME/inv/        #NEED TO ADD HANDLING FOR WHEN DIRECTORY ALREADY EXISTS?
+mkdir $HOME/inv/ >&/dev/null       
 touch $HOME/inv/audit.txt 
 adtfile="tee -a $HOME/inv/audit.txt"
 
-echo -e "\n\e[92mThe hostname is: $(hostname)\e[0m" | $adtfile
+echo -e "\n\e[92m"
+echo "The hostname is: $(hostname)" | $adtfile
+echo -e "\e[0m"
 
-#osOut has the prettyname for the OS, which includes the version. We can just grep that for the update script later
+
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 
 printf "This machine's OS is "
-echo -e "\e[31m$osOut\e[0m" | $adtfile
+echo -e "\e[31m"
+echo $osOut | $adtfile
+echo -e "\e[0m"
 
 
 #alpine linux will not be at regionals
@@ -211,7 +224,7 @@ if  grep -i "alpine" /etc/os-release ; then
     done
 fi
 
-echo -e "\n\e[95m***IP ADDRESSES***\e[0m"
+echo -e "\e[95m***IP ADDRESSES***\e[0m"
 echo "Most recent IP: $(hostname -I | awk '{print $1}')"
 echo "All IP Addresses: $(hostname -I)" | $adtfile
 
@@ -221,6 +234,19 @@ if [ -f /etc/sudoers ] ; then
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
+# I stole this from jordan
+minid=$(grep "^UID_MIN" /etc/login.defs || echo 1000)n
+maxid=$(grep "^UID_MAX" /etc/login.defs || echo 60000)
+printf "========================================================\n| Users List | Key: \033[01;34mUID = 0\033[0m, \033[01;32mUser\033[0m, \033[01;33mCan Login\033[0m, \033[01;31mNo Login\033[0m |\n========================================================\n"
+awk -F':' -v minuid="${minid#UID_MIN}" -v maxuid="${maxid#UID_MAX}" '{
+if ($7=="/bin/false" || $7=="/sbin/nologin") printf "\033[1;31m%s\033[0m\n", $1; 
+else if ($3=="0") printf "\033[01;34m%s\033[0m\n", $1; 
+else if ($3 >= minuid && $3 <= maxuid) printf "\033[01;32m%s\033[0m\n", $1; 
+else printf "\033[01;33m%s\033[0m\n", $1; 
+}' /etc/passwd | column
+
+printf "\n[  \033[01;35mUser\033[0m, \033[01;36mGroup\033[0m  ]\n" && grep "sudo\|adm\|bin\|sys\|uucp\|wheel\|nopasswdlogin\|root" /etc/group | awk -F: '{printf "\033[01;35m" $4 "\033[0m : \033[01;36m" $1 "\033[0m\n"}' | column
+printf "${CMT}To delete users/groups, use ${CMD}sudo userdel -r \$s${CMT} and ${CMD}sudo groupdel \$user${RST}\n"
 
 # ## Less Fancy /etc/shadow
 printf "Passwordless accounts: "
@@ -236,11 +262,13 @@ grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
 printf "\n\e[93m***USERS IN WHEEL GROUP***\e[0m\n"
 grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
-
+printf "\n\e[35mCrontabs\e[0m\n"
+sudo grep -R . /var/spool/cron/crontabs/
+for user in $(cut -f1 -d: /etc/passwd); do crontab -u "$user" -l 2> >(grep -v 'no crontab for'); done
 
 #saves services to variable, prints them out to terminal in blue
 printf '\n**services you should cry about***\n'
-services=$(ps aux | grep 'Docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
+services=$(ps aux | grep -i 'docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
 echo -e "\e[34m"
 echo $services | $adtfile
 echo -e "\e[0m" #formatting so audit file is less fucked with the color markers
