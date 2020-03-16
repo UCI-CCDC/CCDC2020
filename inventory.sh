@@ -182,10 +182,13 @@ outFile="$HOME/inv/audit-$(hostname).txt"
 touch outFile
 adtfile="tee -a $HOME/inv/audit-$(hostname).txt"
 
+
+
 echo -e "\n\e[92m"
-echo "hostname: $(hostname)" | $adtfile
+echo "Hostname: $(hostname)" | $adtfile
 echo -e "\e[0m"
 
+echo "Date: $(date)" >> $outFile
 
 osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 
@@ -201,10 +204,11 @@ echo "All IP Addresses: $(hostname -I)" | $adtfile
 
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
-    printf "\nSudoers\n"
-    echo "Sudoers file:" >> $outFile
-    sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
+    printf "\nSudoers File:\n"
+    sudo awk '!/#(.*)|^$/' /etc/sudoers 
+    echo ""
 fi 
+
 
 # I stole this from jordan
 minid=$(grep "^UID_MIN" /etc/login.defs || echo 1000)n
@@ -220,9 +224,8 @@ else printf "\033[01;33m%s\033[0m\n", $1;
 printf "\n[  \033[01;35mUser\033[0m, \033[01;36mGroup\033[0m  ]\n" && grep "sudo\|adm\|bin\|sys\|uucp\|wheel\|nopasswdlogin\|root" /etc/group | awk -F: '{printf "\033[01;35m" $4 "\033[0m : \033[01;36m" $1 "\033[0m\n"}' | column
 
 # ## Less Fancy /etc/shadow
-printf "Passwordless accounts: "
+echo -e "\n\e[93m***Passwordless accounts***\e[0m\n"
 awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
-echo;
 
 echo -e "\n\e[93m***USERS IN SUDO GROUP***\e[0m\n"
 echo "Users in sudo group:" >> $outFile
@@ -247,6 +250,9 @@ echo -e "\e[34m"
 echo "Services on this machine:" >> $outFile
 echo $services | $adtfile
 echo -e "\e[0m" #formatting so audit file is less fucked with the color markers
+
+banner >> $outFile
+printf "\n\n" >> $outFile
 
 
 #these if statements make sure that updates are executed at the end of the script running, instead of the beginning
