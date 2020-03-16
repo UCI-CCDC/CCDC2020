@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 ########################################################
 # https://github.com/UCI-CCDC/CCDC2020
 # script raw is at https://git.io/uciccdc20
@@ -11,23 +10,6 @@
 #UCI CCDC, 2020
 ########################################################
 
-# Features to add -----------------------------
-# are sql  password changes automatable? 
-# set script to check for non-default cron jobs
-    # automatically upload the audit to 0x0.st? kinda a security risk (have it start the file off with the machine's IP and hostname)
-#is it possible to automate verifying permissions on important files?
-#
-#automate backups?
-
-# TODO -----------------------------------------
-# Test on other systems
-    #Raspbian
-    # Debian
-    #CentOS
-    #Scientific Linux
-    # Oracle Linux
-    # RHEL
-# Move alpine functionality to different part of script?
 
 if [[ $EUID -ne 0 ]]; then
 	printf 'Must be run as root, exiting!\n'
@@ -55,20 +37,23 @@ updateOS() {
 
 }
 
+
+#FINISH ME PLS
 installPackages() {
+    packages="curl sudo nmap tmux tshark man vim hostname htop"
     printf "this function will be used to install important/essential packages on barebones systems"
-    #curl, sudo, nmap, tmux, tshark, man, vim, hostname
         if [ $(command -v apt-get) ]; then # Debian based
-            apt-get install curl sudo nmap tmux tshark man vim hostname -y -q
+            apt-get install $packages -y -q
 
         elif [ $(command -v yum) ]; then
-            yum update
+            yum -y install $packages 
         elif [ $(command -v pacman) ]; then 
-            pacman -Syy
-            pacman -Su
+            yes | pacman -S $packages
         elif [ $(command -v apk) ]; then # Alpine
             apk update
             apk upgrade
+            apk add bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            apk add $packages
         fi
 }
 
@@ -79,7 +64,7 @@ harden() {
     read -r -p "Are you sure? The harden script is currently non-functional, as of March 02 [Y/n] " response
     case "$response" in
         [yY][eE][sS]|[yY]) 
-            wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/jacob/harden.sh -O harden.sh && bash harden.sh
+            wget https://raw.githubusercontent.com/UCI-CCDC/CCDC2020/master/harden.sh -O harden.sh && bash harden.sh
 
             ;;
         *)
@@ -100,7 +85,7 @@ do
 case "${option}" in
 h) 
     printf "\n UCI CCDC 2020 Linux Inventory Script\n"
-    printf "Note: all options other than the update functions will result in the main script not being run."
+    printf "Note: all flags other than the update functions will result in the main script not being run.\n"
 
     printf "    ==============Options==============\n"
     printf " -h     Prints this help menu\n"
@@ -190,13 +175,15 @@ echo '
       zot zot, thots.'
 
 
+#generate inv directory, audit.txt, and set up variables for redirection
 printf "\n*** generating inv direcory and audit.txt in your root home directory\n"
-mkdir $HOME/inv/ >&/dev/null       
-touch $HOME/inv/audit.txt 
-adtfile="tee -a $HOME/inv/audit.txt"
+mkdir $HOME/inv/ >&/dev/null;       #creates directory; stderr is redirected in the case that directory already exists
+outFile="$HOME/inv/audit-$(hostname).txt"
+touch outFile
+adtfile="tee -a $HOME/inv/audit-$(hostname).txt"
 
 echo -e "\n\e[92m"
-echo "The hostname is: $(hostname)" | $adtfile
+echo "hostname: $(hostname)" | $adtfile
 echo -e "\e[0m"
 
 
@@ -204,25 +191,9 @@ osOut=$(cat /etc/os-release | grep -w "PRETTY_NAME" | cut -d "=" -f 2)
 
 printf "This machine's OS is "
 echo -e "\e[31m"
+
 echo $osOut | $adtfile
 echo -e "\e[0m"
-
-
-#alpine linux will not be at regionals
-if  grep -i "alpine" /etc/os-release ; then
-    alpinelp=1
-    while [ "$alpinelp" == 1 ] ; do
-        printf "Alpine? lol k, do you want to install some basic stuff? [y/N/? for list]"
-        read -r alpinechoice
-            case "$alpinechoice" in 
-            Y|y) apk update && apk upgrade && apk add bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
-            alpinelp=0;;
-            N|n) alpinelp=0;; 
-            w) printf "bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils";;
-            *) printf "invalid choice" 
-        esac
-    done
-fi
 
 echo -e "\e[95m***IP ADDRESSES***\e[0m"
 echo "Most recent IP: $(hostname -I | awk '{print $1}')"
@@ -231,6 +202,7 @@ echo "All IP Addresses: $(hostname -I)" | $adtfile
 ## /etc/sudoers
 if [ -f /etc/sudoers ] ; then
     printf "\nSudoers\n"
+    echo "Sudoers file:" >> $outFile
     sudo awk '!/#(.*)|^$/' /etc/sudoers | $adtfile
 fi 
 
@@ -246,7 +218,6 @@ else printf "\033[01;33m%s\033[0m\n", $1;
 }' /etc/passwd | column
 
 printf "\n[  \033[01;35mUser\033[0m, \033[01;36mGroup\033[0m  ]\n" && grep "sudo\|adm\|bin\|sys\|uucp\|wheel\|nopasswdlogin\|root" /etc/group | awk -F: '{printf "\033[01;35m" $4 "\033[0m : \033[01;36m" $1 "\033[0m\n"}' | column
-printf "${CMT}To delete users/groups, use ${CMD}sudo userdel -r \$s${CMT} and ${CMD}sudo groupdel \$user${RST}\n"
 
 # ## Less Fancy /etc/shadow
 printf "Passwordless accounts: "
@@ -254,12 +225,15 @@ awk -F: '($2 == "") {print}' /etc/shadow # Prints accounts without passwords
 echo;
 
 echo -e "\n\e[93m***USERS IN SUDO GROUP***\e[0m\n"
+echo "Users in sudo group:" >> $outFile
 grep -Po '^sudo.+:\K.*$' /etc/group | $adtfile
 
 printf "\n\e[93m***USERS IN ADMIN GROUP***\e[0m\n"
+echo "Users in Admin Group:" >> $outFile
 grep -Po '^admin.+:\K.*$' /etc/group | $adtfile
 
 printf "\n\e[93m***USERS IN WHEEL GROUP***\e[0m\n"
+echo "Users in Wheel Group:" >> $outFile
 grep -Po '^wheel.+:\K.*$' /etc/group | $adtfile
 
 printf "\n\e[35mCrontabs\e[0m\n"
@@ -267,13 +241,15 @@ sudo grep -R . /var/spool/cron/crontabs/
 for user in $(cut -f1 -d: /etc/passwd); do crontab -u "$user" -l 2> >(grep -v 'no crontab for'); done
 
 #saves services to variable, prints them out to terminal in blue
-printf '\n**services you should cry about***\n'
-services=$(ps aux | grep -i 'docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9' | grep -v "grep")
+printf '\n***services you should cry about***\n'
+services=$(ps aux | grep -i 'docker\|samba\|postfix\|dovecot\|smtp\|psql\|ssh\|clamav\|mysql\|bind9\|apache\|smbfs\|samba\|openvpn\|splunk' | grep -v "grep")
 echo -e "\e[34m"
+echo "Services on this machine:" >> $outFile
 echo $services | $adtfile
 echo -e "\e[0m" #formatting so audit file is less fucked with the color markers
 
 
+#these if statements make sure that updates are executed at the end of the script running, instead of the beginning
 if [ "$ShouldUpdate" = "true" ]; then
     updateOS
 fi
@@ -282,21 +258,6 @@ if [ "$ShouldInstall" = "true" ]; then
     installPackages
 fi
 
-
-
-
-## NOTE WORKING O NTHIS FOR NOW, IDK IF THERE IS ALWAYS A .BASH_PROFILE IN ~
-# echo 'NOTE THIS MIGHT NOT WORK'
-#  # shellcheck disable=SC2016
-# printf '*** Making Bash profile log time/date using at $HOME/.bash_profile ***'
-#  # shellcheck disable=SC2183
-# if printf 'export HISTTIMEFORMAT="%d/%m/%y %T"' >> ~/.bash_profile >/dev/null 2>/dev/null == 0 ; then 
-#     # shellcheck source=/dev/null
-#       source ~/.bash_profile
-    
-# else 
-#     echo something went wrong with making bash profile track time! 
-# fi
 
 
 # this string prints the current system time and date "\033[01;30m$(date)\033[0m: %s\n"
