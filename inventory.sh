@@ -40,7 +40,7 @@ updateOS() {
 
 #FINISH ME PLS
 installPackages() {
-    packages="curl sudo nmap tmux tshark man vim hostname htop"
+    packages="sudo nmap tmux tshark vim hostname htop clamav"
     printf "this function will be used to install important/essential packages on barebones systems"
         if [ $(command -v apt-get) ]; then # Debian based
             apt-get install $packages -y -q
@@ -52,7 +52,8 @@ installPackages() {
         elif [ $(command -v apk) ]; then # Alpine
             apk update
             apk upgrade
-            apk add bash vim curl man man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils 
+            apk add bash vim man-pages mdocml-apropos bash-doc bash-completion util-linux pciutils usbutils coreutils binutils findutils attr dialog dialog-doc grep grep-doc util-linux-doc pciutils usbutils binutils findutils readline lsof lsof-doc less less-doc nano nano-doc curl-doc
+
             apk add $packages
         fi
 }
