@@ -10,7 +10,7 @@
  //     \ |‾‾‾\_ |     ‾‾
 //      _\|    _\|
 
-      zot zot, thots.
+      zot zot zot.
 '''
 
 if [[ $EUID -ne 0 ]]; then
